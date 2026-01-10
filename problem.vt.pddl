@@ -1,13 +1,9 @@
-(define (problem spray_control)
+(define (problem misting)
 
-  (:domain vertical_farm_spray)
+  (:domain vertical_farm_misting)
 
   (:objects
-    ; Objects: layers of the vertical farm, nozzles in the vertical farm
-
-    layer1 - layer
-    nozzle1 - nozzle
-    pump1 - pump
+    main-pump - pump
   )
 
   (:init
@@ -17,14 +13,33 @@
     ; Final goal: maintain the humidity of each layer of the vertical farm between 40% and 60% while minimizing energy usage
 
     ; Can be modified based on actual starting configuration
-    (= (humidity layer1) 0.5)
-    (connected nozzle1 layer1)
+    ; Define starting configuration
+    (not (pump-on))
+    (= (pressure) 0.0)
+    (= (flow-rate) 0.0)
+    (= (energy-use) 0.0)
+    (= (humidity) 50)
+
+    ; Calculate these by hand and plug them in
+    ; Define constants
+    (= PRESSURE_INC_RATE 0.1) ; Compute with Bernoulli's equation
+    (= PRESSURE_DEC_RATE 0.1)
+    (= FLOW_RATE 0.1) ; Compute with flow rate equation
+
+    (= HUMIDITY_INC_RATE 0.1) ; Search how to calculate
+    (= HUMIDITY_DEC_RATE 0.1)
+
+    (= ENERGY_RATE 0.1) ; Search how to calculate
+
+    (= MAX_PRESSURE 0.8) ; Set based on system
+    (= MAX_ENERGY 1.0)
+    (= TARGET_HUMIDITY 60.0)
   )
 
-  ; Modify to include all layers, and to minimize energy use
+  ; Modify to minimize energy use
   (:goal (and
-    (>= (humidity layer1) 0.4)
-    (<= (humidity layer1) 0.6)
+    (>= (humidity) 40.0)
+    (<= (humidity) 60.0)
   ))
 
   ; Run and val with enhsp

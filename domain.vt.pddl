@@ -1,106 +1,118 @@
-(define (domain vertical_farm_spray)
+(define (domain vertical_farm_misting)
 
-  (:requirements :equality :negative-preconditions :typing :adl :fluents :durative-actions)
+  (:requirements :equality :negative-preconditions :typing :adl :fluents)
 
   (:types
-    layer nozzle pump
+    pump
   )
 
   (:predicates
-    (pump-on ?p - pump) ; Pump on or off
-    (connected ?n - nozzle ?l - layer) ; Determine which nozzle is on which layer
+    (pump-on) ; Pump on or off
   )
 
   (:functions
-    (humidity ?l - layer) ; Keep track of humidity at each layer
-    (pressure ?n - nozzle) ; Keep track of pressure at each nozzle (may change to be pressure at different points in the system or overall)
-    (flow-rate ?n - nozzle) ; Keep track of flow rate at each nozzle (may change to be pressure at different points in the system or overall)
-    (energy-use) ; Keep track of energy consumption
+    (pressure) ; Keep track of pressure, Mpa
+    (flow-rate) ; Keep track of flow rate, L/min
+    (humidity) ; Keep track of humidity, %
+    (energy-use) ; Keep track of energy consumption, kWh
+  )
+
+  ;; Actions
+
+  ; Action to activate the pump
+  ; Precondition: pump is not on
+  ; Effect: pump is on
+  ; Consider adding time delay (because it takes a second or so for the pump to start going)
+  (:action activate-pump
+    :precondition (not (pump-on))
+    :effect (pump-on)
   )
 
   ; Action to activate the pump
-  ; Effect: start spraying process and turn pump on, then turn it off when done
-  ; In the future, consider adding time delay (because it takes a second or so for the pump to start going)
-  (:durative-action activate-pump
-      :parameters ()
-      :duration (>= ?duration 0)
-      :condition (and 
-          (at start (not (pump-on)))
-          (at start (not (sprayed)))
-      )
-      :effect (and 
-          (at start (pump-on))
-          (at start (spraying))
-          (at end (not (spraying)))
-          (at end (not (pump-on)))
-          (at end (sprayed))
-      )
+  ; Precondition: pump is not on
+  ; Effect: pump is on
+  (:action deactivate-pump
+    :precondition (pump-on)
+    :effect (not (pump-on))
   )
 
-  ; Put a deactivate-pump action
-
-  ; Process to calculate flow rate
-  (:process spray-process
-      :parameters (velocity area) ; Need to define these elsewhere and decide which equations will be modelled
-      :precondition (spraying)
-      :effect (increase (flow-rate) (* velocity area))
-  )
-  
-  ; Event to shut pump off if pressure exceeds max pressure
-  (:event pump-failure
-      :parameters ()
-      :precondition (> (pressure) max-pressure) ; Need to define max pressure elsewhere
-      :effect (and
-        (not (pump-on))
-        (not (spraying))
-      )
+  ; Action to stop the pump when the target humidity is reached
+  ; Precondition: pump is on and target humidity is reached
+  ; Effect: turn pump off
+  (:action humidity-reached
+    :precondition (and
+      (pump-on)
+      (>= (humidity) TARGET_HUMIDITY)) ; Need to define TARGET_HUMIDITY elsewhere
+    :effect (not (pump-on))
   )
 
-  ; Process for calculating pressure at a nozzle
-  ; Precondition: nozzle on
-  ; Effect: should calculate pressure based on Bernoulli's equation
-  (:process pressure-calc
-    :parameters (?n - nozzle)
-    :precondition (nozzle-on ?n)
-    :effect (increase (pressure ?n) (* #t 0.1)) ; Put Bernoulli's equation here, and elsewhere define the appropriate constants. May need multiple points/processes to calculate this correctly
+  ; Action to stop the pump when the maximum energy is exceeded
+  ; Precondition: pump is on and energy use exceeds max energy
+  ; Effect: turn pump off
+  (:action energy-exceeded
+    :precondition (and
+      (pump-on)
+      (> (energy-use) MAX_ENERGY)) ; Need to define MAX_ENERGY elsewhere
+    :effect (not (pump-on))
   )
 
-  ; Process for calculating flow rate at a nozzle
-  ; Precondition: nozzle on
-  ; Effect: should calculate flow rate based on the appropriate equation
-  (:process flow-rate-calc
-    :parameters (?n - nozzle)
-    :precondition (nozzle-on ?n)
-    :effect (increase (flow-rate ?n) (* #t 0.1)) ; Put flow rate equation here, and elsewhere define the appropriate constants
+  ;; Processes
+
+  ; Process to increase pressure while the pump is on
+  ; Precondition: pump is on
+  ; Effect: increase pressure over time
+  (:process pressure-inc
+    :precondition (pump-on)
+    :effect (increase (pressure) (* #t PRESSURE_INC_RATE)) ; Define PRESSURE_INC_RATE constant elsewhere
   )
 
-  ; Process for increasing humidity while spray is on
-  ; Precondition: nozzle connected to layer and on
-  ; Effect: increase humidity by 0.5% per second for now
-  ; For now, this is one nozzle connected to one layer
+  ; Process to decrease pressure while the pump is off
+  ; Precondition: pump is off
+  ; Effect: decrease pressure over time
+  (:process pressure-dec
+    :precondition (not (pump-on))
+    :effect (decrease (pressure) (* #t PRESSURE_DEC_RATE)) ; Define PRESSURE_DEC_RATE constant elsewhere
+  )
+
+  ; Process to calculate flow rate during misting
+  ; Precondition: pump is on
+  ; Effect: calculate flow rate
+  (:process flow-calc
+    :precondition (pump-on)
+    :effect (assign (flow-rate) FLOW_RATE) ; Define FLOW_RATE constant elsewhere
+  )
+
+  ; Process to increase humidity when pump is on
+  ; Precondition: pump is on
+  ; Effect: increase humidity over time
   (:process humidity-inc
-    :parameters (?l - layer ?n - nozzle)
-    :precondition (and (connected ?n ?l) (nozzle-on ?n))
-    :effect (increase (humidity ?l) (* #t 0.5))
+    :precondition (pump-on)
+    :effect (increase (humidity) (* #t HUMIDITY_INC_RATE)) ; Define HUMIDITY_INC_RATE constant elsewhere
   )
 
-  ; Process for decreasing humidity
-  ; Precondition: nozzle connected to layer and off
-  ; Effect: decrease humidity by 0.1% per second for now
-  ; For now, this is one nozzle connected to one layer
+  ; Process to decrease humidifity when pump is off
+  ; Precondition: pump is off
+  ; Effect: decrease humidity over time
   (:process humidity-dec
-    :parameters (?l - layer ?n - nozzle)
-    :precondition (and (connected ?n ?l) (not (nozzle-on ?n)))
-    :effect (decrease (humidity ?l) (* #t 0.1))
+    :precondition (not (pump-on))
+    :effect (decrease (humidity) (* #t HUMIDITY_DEC_RATE)) ; Define HUMIDITY_DEC_RATE constant elsewhere
   )
 
-  ; Process for calculating energy usage
-  ; Precondition: nozzle on
-  ; Effect: should calculate energy usage based on the appropriate equation
+  ; Process to calculate energy usage when pump is on
+  ; Precondition: pump is on
+  ; Effect: calculate energy usage over time
   (:process energy-calc
-    :parameters (?n - nozzle)
-    :precondition (nozzle-on ?n)
-    :effect (increase (energy-use ?n) (* #t 0.1)) ; Determine correct energy usage equation and put it here, and elsewhere define the appropriate constants
+    :precondition (pump-on)
+    :effect (increase (energy-use) (* #t ENERGY_RATE)) ; Define ENERGY_RATE constant elsewhere
   )
 
+  ;; Events
+
+  ; Event to shut pump off if pressure exceeds max pressure
+  ; Precondition: pressure exceeds max pressure
+  ; Effect: turn pump off
+  (:event pump-failure
+    :precondition (> (pressure) MAX_PRESSURE) ; Need to define MAX_PRESSURE elsewhere
+    :effect (not (pump-on))
+  )
 )
