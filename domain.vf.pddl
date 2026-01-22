@@ -1,6 +1,6 @@
 (define (domain vertical_farm_misting)
 
-  (:requirements :typing :negative-preconditions :numeric-fluents :time)
+  (:requirements :typing :negative-preconditions :fluents)
 
   (:types
     nozzle pump tube
@@ -8,18 +8,19 @@
 
   (:predicates
     (pump-on ?p - pump) ; Pump on or off
-    (connected ?from ?to ?tube - tube); Objects are connected by tubes
+    ; (connected ?from ?to ?tube - tube); Objects are connected by tubes
   )
 
   (:functions
     ; Variables
+    (time) ; Simulation time, s
     (humidity) ; Current humidity, %
     (pressure) ; Keep track of pressure, Mpa
     (flow-rate) ; Keep track of flow rate, L/min
     (energy-use) ; Keep track of energy consumption, kWh
 
     ; Constants
-    (tube-area); Area of tube, in^2
+    ; (tube-area); Area of tube, in^2
     (min-humidity) ; Min humidity, %
     (max-humidity) ; Max humidity, %
     (max-pressure); Max pressure, Mpa
@@ -80,6 +81,14 @@
 
   ;; Processes
 
+  ; Process to increase time
+  ; Effect: increase time over time
+  (:process time-inc
+    :parameters ()
+    :precondition (>= (time) 0)
+    :effect (increase (time) (* #t 1))
+  )
+
   ; Process to increase pressure while the pump is on
   ; Precondition: pump is on
   ; Effect: increase pressure over time
@@ -90,11 +99,13 @@
   )
 
   ; Process to decrease pressure while the pump is off
-  ; Precondition: pump is off
+  ; Precondition: pump is off, pressure is above 0
   ; Effect: decrease pressure over time
   (:process pressure-dec
     :parameters (?p - pump)
-    :precondition (not (pump-on ?p))
+    :precondition (and
+      (not (pump-on ?p))
+      (> (pressure) 0))
     :effect (decrease (pressure) (* #t (pressure-dec-rate)))
   )
 
@@ -117,11 +128,13 @@
   )
 
   ; Process to decrease humidifity when pump is off
-  ; Precondition: pump is off
+  ; Precondition: pump is off, humidity is above 0
   ; Effect: decrease humidity over time
   (:process humidity-dec
     :parameters (?p - pump)
-    :precondition (not (pump-on ?p))
+    :precondition (and
+      (not (pump-on ?p))
+      (> (humidity) 0))
     :effect (decrease (humidity) (* #t (humidity-dec-rate)))
   )
 
@@ -142,6 +155,8 @@
   (:event pump-failure
     :parameters (?p - pump)
     :precondition (> (pressure) (max-pressure))
-    :effect (not (pump-on))
+    :effect (not (pump-on ?p))
   )
+
+  
 )

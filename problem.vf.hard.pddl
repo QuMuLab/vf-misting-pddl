@@ -7,7 +7,7 @@
     ; TODO: might add different heights for this. also in order to model the whole growbox should probably take into account that there's nested tube loops
     main-pump - pump
     nozzle1 nozzle2 nozzle3 nozzle4 - nozzle
-    tube1 tube2 tube3 tube4 - tube
+    ; tube1 tube2 tube3 tube4 - tube
   )
 
   (:init
@@ -20,11 +20,11 @@
     ; TODO: For any values that are currently placeholders, calculate them and plug them in
     ; Objects
     (not (pump-on main-pump))
-    (connected main-pump nozzle1 tube1)
-    (connected nozzle1 nozzle2 tube2)
-    (connected nozzle2 nozzle3 tube3)
-    (connected nozzle3 nozzle4 tube4)
-    (connected nozzle4 main-pump tube1)
+    ; (connected main-pump nozzle1 tube1)
+    ; (connected nozzle1 nozzle2 tube2)
+    ; (connected nozzle2 nozzle3 tube3)
+    ; (connected nozzle3 nozzle4 tube4)
+    ; (connected nozzle4 main-pump tube1)
 
     ; Start values
     (= (humidity) 50)
@@ -33,7 +33,7 @@
     (= (energy-use) 0.0)
 
     ; Constants
-    (= (tube-area) 0.018) ; Assume tube is 0.25" outer diameter, 0.049" wall thickness
+    ; (= (tube-area) 0.018) ; Assume tube is 0.25" outer diameter, 0.049" wall thickness
     (= (min-humidity) 40.0)
     (= (max-humidity) 60.0)
     (= (max-pressure) 0.8) ; Set based on system
