@@ -17,7 +17,7 @@
     ; (connected main-pump main-pump tube1)
 
     ; Start values
-    (= (time) 0)
+    (= (sim-time) 0)
     (= (humidity) 30)
     (= (pressure) 0)
     (= (flow-rate) 0)
@@ -42,8 +42,7 @@
   ; Primary goal: run for 10 seconds, achieve done state
   ; Secondary goal: maintain humidity within range
   (:goal (and
-    (>= (time) 10)
-    (> (flow-rate) 0)
+    (done)
     ; (>= (humidity) (min-humidity))
     ; (<= (humidity) (max-humidity))
   ))

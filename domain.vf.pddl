@@ -1,19 +1,21 @@
 (define (domain vertical_farm_misting)
 
-  (:requirements :typing :negative-preconditions :fluents)
+  (:requirements :equality :negative-preconditions :typing :adl :fluents)
 
   (:types
-    nozzle pump tube
+    nozzle pump ; tube
   )
 
   (:predicates
     (pump-on ?p - pump) ; Pump on or off
     ; (connected ?from ?to ?tube - tube); Objects are connected by tubes
+
+    (done) ; Special predicate for goal state
   )
 
   (:functions
     ; Variables
-    (time) ; Simulation time, s
+    (sim-time) ; Simulation time, s
     (humidity) ; Current humidity, %
     (pressure) ; Keep track of pressure, Mpa
     (flow-rate) ; Keep track of flow rate, L/min
@@ -75,8 +77,15 @@
     :parameters (?p - pump)
     :precondition (and
       (pump-on ?p)
-      (> (energy-use) (max-energy)))
+      (>= (energy-use) (max-energy)))
     :effect (not (pump-on ?p))
+  )
+
+  ; Action to set the done state when simulation time reaches 10 seconds
+  (:action finish
+    :parameters ()
+    :precondition (>= (sim-time) 10)
+    :effect (done)
   )
 
   ;; Processes
@@ -85,8 +94,8 @@
   ; Effect: increase time over time
   (:process time-inc
     :parameters ()
-    :precondition (>= (time) 0)
-    :effect (increase (time) (* #t 1))
+    :precondition (<= (sim-time) 10)
+    :effect (increase (sim-time) (* #t 1))
   )
 
   ; Process to increase pressure while the pump is on
@@ -105,7 +114,7 @@
     :parameters (?p - pump)
     :precondition (and
       (not (pump-on ?p))
-      (> (pressure) 0))
+      (>= (pressure) 0))
     :effect (decrease (pressure) (* #t (pressure-dec-rate)))
   )
 
@@ -134,7 +143,7 @@
     :parameters (?p - pump)
     :precondition (and
       (not (pump-on ?p))
-      (> (humidity) 0))
+      (>= (humidity) 0))
     :effect (decrease (humidity) (* #t (humidity-dec-rate)))
   )
 
@@ -154,9 +163,7 @@
   ; Effect: turn pump off
   (:event pump-failure
     :parameters (?p - pump)
-    :precondition (> (pressure) (max-pressure))
+    :precondition (>= (pressure) (max-pressure))
     :effect (not (pump-on ?p))
   )
-
-  
 )
