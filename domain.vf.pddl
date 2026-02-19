@@ -8,8 +8,6 @@
 
   (:predicates
     (pump-on ?p - pump) ; Pump on or off
-    ; (connected ?from ?to ?tube - tube); Objects are connected by tubes
-
     (done) ; Special predicate for goal state
   )
 
@@ -22,18 +20,17 @@
     (energy-use) ; Keep track of energy consumption, kWh
 
     ; Constants
-    ; (tube-area); Area of tube, in^2
     (min-humidity) ; Min humidity, %
     (max-humidity) ; Max humidity, %
-    (max-pressure); Max pressure, Mpa
-    (max-energy); Max energy, kWh
+    (max-pressure) ; Max pressure, Mpa
+    (flow-coeff) ; Coefficient for flow rate calculation, units
+    (max-energy) ; Max energy, kWh
 
     ; Rates
     (humidity-inc-rate); Rate of humidity increase, %/s
     (humidity-dec-rate); Rate of humidity decrease, %/s
     (pressure-inc-rate); Rate of pressure increase, Mpa/s
     (pressure-dec-rate); Rate of pressure decrease, Mpa/s
-    (flow-inc-rate); Rate of flow rate increase, L/min/s
     (energy-inc-rate); Rate of energy consumption, kWh/s
   )
 
@@ -45,7 +42,9 @@
   ; Consider adding time delay (because it takes a second or so for the pump to start going)
   (:action activate-pump
     :parameters (?p - pump)
-    :precondition (not (pump-on ?p))
+    :precondition (and
+      (not (pump-on ?p))
+      (<= (pressure) (max-pressure)))
     :effect (pump-on ?p)
   )
 
@@ -103,7 +102,9 @@
   ; Effect: increase pressure over time
   (:process pressure-inc
     :parameters (?p - pump)
-    :precondition (pump-on ?p)
+    :precondition (and
+      (pump-on ?p)
+      (<= (pressure) max-pressure))
     :effect (increase (pressure) (* #t (pressure-inc-rate)))
   )
 
@@ -116,15 +117,6 @@
       (not (pump-on ?p))
       (>= (pressure) 0))
     :effect (decrease (pressure) (* #t (pressure-dec-rate)))
-  )
-
-  ; Process to calculate flow rate during misting
-  ; Precondition: pump is on
-  ; Effect: calculate flow rate
-  (:process flow-calc
-    :parameters (?p - pump)
-    :precondition (pump-on ?p)
-    :effect (increase (flow-rate) (* #t (flow-inc-rate)))
   )
 
   ; Process to increase humidity when pump is on
@@ -161,9 +153,19 @@
   ; Event to shut pump off if pressure exceeds max pressure
   ; Precondition: pressure exceeds max pressure
   ; Effect: turn pump off
-  (:event pump-failure
-    :parameters (?p - pump)
-    :precondition (>= (pressure) (max-pressure))
-    :effect (not (pump-on ?p))
-  )
+  ; (:event pump-failure
+  ;   :parameters (?p - pump)
+  ;   :precondition (>= (pressure) (max-pressure))
+  ;   :effect (not (pump-on ?p))
+  ; )
+
+  ; TODO: Decide on modelling choice for flow rate - press button to calculate?
+  ; Action to calculate flow rate from pressure
+  ; Precondition: pump is on
+  ; Effect: calculate flow rate
+  ; (:action flow-calc
+  ;   :parameters (?p - pump)
+  ;   :precondition (pump-on ?p)
+  ;   :effect (assign (flow-rate) (* (flow-coeff) (pressure)))
+  ; )
 )
