@@ -1,6 +1,6 @@
 (define (domain vertical_farm_misting)
 
-  (:requirements :equality :negative-preconditions :typing :adl :fluents :continuous-effects)
+  (:requirements :equality :negative-preconditions :typing :adl :fluents)
 
   (:types
     pump ; nozzle tube
@@ -154,7 +154,7 @@
   (:process flow-inc
     :parameters (?p - pump)
     :precondition (pump-on ?p)
-    :effect (increase (flow-rate) (* #t (* (flow-const) (- (* (flow-coeff) (max-pressure)) (flow-rate)))))
+    :effect (increase (flow-rate) (* #t (* (flow-const) (- (* (flow-coeff) (pressure)) (flow-rate)))))
   )
 
   (:process flow-dec

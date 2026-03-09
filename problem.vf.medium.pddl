@@ -1,4 +1,4 @@
-(define (problem misting)
+(define (problem misting-medium)
 
   (:domain vertical_farm_misting)
 
