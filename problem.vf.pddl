@@ -1,4 +1,4 @@
-(define (problem misting-easy)
+(define (problem misting)
 
   (:domain vertical_farm_misting)
 
@@ -12,13 +12,14 @@
     ; Objects
     (not (pump-on main-pump))
     (not (nozzle-on nozzle1))
-    (not (pump-fault))
-    (not (nozzle-fault))
+    (not (pump-fault main-pump))
+    (not (nozzle-fault nozzle1))
+    (not (done))
 
     ; Start values
     (= (sim-time) 0)
-    (= (humidity) 30)
     (= (pressure) 0)
+    (= (humidity) 30)
 
     (= (flow-up) 0)
     (= (flow-nozzle) 0)
@@ -26,9 +27,10 @@
 
     ; Constants
     (= (max-pressure) 75)
+
     (= (time-const) 5)
-    (= (flow-const) 5)
-    (= (flow-coeff) 0.003467) ; (= (flow-coeff) 0.022766) for sqrt
+
+    (= (up-coeff) 0.003467) ; (= (up-coeff) 0.022766) for sqrt
     (= (nozzle-coeff) 0.002133) ; (= (nozzle-coeff) 0.011383) for sqrt
 
     (= (min-humidity) 40)

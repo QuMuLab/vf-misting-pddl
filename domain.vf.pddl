@@ -11,25 +11,26 @@
     (nozzle-on ?n - nozzle) ; Nozzle on or off
     (done) ; Special predicate for goal state
 
-    (nozzle-fault) ; Detect when there's an issue with nozzle not turning on
-    (pump-fault) ; Detect when there's an issue with the pump
+    (nozzle-fault ?n - nozzle) ; Detect when there's an issue with nozzle not turning on
+    (pump-fault ?p - pump) ; Detect when there's an issue with the pump
   )
 
   (:functions
     ; Variables
     (sim-time) ; Simulation time, s
-    (pressure) ; Keep track of pressure, psi
+    (pressure) ; Pressure, psi
     (humidity) ; Current humidity, %
 
-    (flow-up) ; Keep track of upstream flow rate, L/min
-    (flow-down) ; Keep track of downstream flow rate, L/min
-    (flow-nozzle) ; Keep track of branch flow rate, L/min
+    (flow-up) ; Upstream flow rate, L/min
+    (flow-down) ; Downstream flow rate, L/min
+    (flow-nozzle) ; Branch flow rate, L/min
 
     ; Constants
-    (max-pressure) ; Max pressure, Mpa
+    (max-pressure) ; Max pressure, psi
+
     (time-const) ; Time constant, s
-    (flow-const) ; Time constant, s
-    (flow-coeff) ; Coefficient for flow rate calculation, units
+
+    (up-coeff) ; Coefficient for upstream flow rate calculation, units
     (nozzle-coeff) ; Coefficient for nozzle flow rate calculation, units
 
     (min-humidity) ; Min humidity, %
@@ -46,11 +47,11 @@
   ; Precondition: pump is not on, pump and nozzle are not faulty
   ; Effect: pump is on
   (:action activate-pump
-    :parameters (?p - pump)
+    :parameters (?p - pump ?n - nozzle)
     :precondition (and
       (not (pump-on ?p))
-      (not (pump-fault))
-      (not (nozzle-fault)))
+      (not (pump-fault ?p))
+      (not (nozzle-fault ?n)))
     :effect (pump-on ?p)
   )
 
@@ -81,18 +82,6 @@
     :parameters (?n - nozzle ?p -pump)
     :precondition (nozzle-on ?n)
     :effect (not (nozzle-on ?n))
-  )
-
-  ; Action to stop the pump when the target humidity is reached
-  ; Precondition: pump is on, humidity is between target max and min humidity
-  ; Effect: turn pump off
-  (:action humidity-reached
-    :parameters (?p - pump)
-    :precondition (and
-      (pump-on ?p)
-      (> (humidity) (min-humidity))
-      (< (humidity) (max-humidity)))
-    :effect (not (pump-on ?p))
   )
 
   ; Action to set the done state when simulation time reaches 10 seconds
@@ -138,18 +127,18 @@
   )
 
   ; Process to increase upstream flow rate while pump is on
-  ; Precondition: pressure is not 0
+  ; Precondition: pump is on
   ; Effect: increase upstream flow rate over time according to dQ/dt = k * (Q_up - Q)
-  ; where Q_up = flow-coeff * sqrt(pressure)
+  ; where Q_up = up-coeff * sqrt(pressure)
   (:process flow-up-inc
     :parameters (?p - pump)
     :precondition (pump-on ?p)
-    :effect (increase (flow-up) (* #t (* (flow-const) (- (* (flow-coeff) (max-pressure)) (flow-up)))))  ; max-pressure for VAL to work
-    ; :effect (increase (flow-up) (* #t (* (flow-const) (- (* (flow-coeff) (^ (pressure) 0.5)) (flow-up)))))  ; normal eq for ENHSP-2020
+    :effect (increase (flow-up) (* #t (* (time-const) (- (* (up-coeff) (max-pressure)) (flow-up)))))  ; max-pressure for VAL to work
+    ; :effect (increase (flow-up) (* #t (* (time-const) (- (* (up-coeff) (^ (pressure) 0.5)) (flow-up)))))  ; normal eq for ENHSP-2020
   )
 
   ; Process to increase nozzle flow rate while nozzle is on
-  ; Precondition: nozzle is on
+  ; Precondition: nozzle is on, upstream flow is larger than nozzle flow
   ; Effect: increase nozzle flow rate over time according to dQ/dt = k * (Q_nozzle - Q)
   ; where Q_nozzle = nozzle-coeff * sqrt(pressure)
   (:process flow-nozzle-inc
@@ -157,8 +146,8 @@
     :precondition (and
       (nozzle-on ?n)
       (> (flow-up) (flow-nozzle)))
-    :effect (increase (flow-nozzle) (* #t (* (flow-const) (- (* (nozzle-coeff) (max-pressure)) (flow-nozzle)))))  ; max-pressure for VAL to work
-    ; :effect (increase (flow-nozzle) (* #t (* (flow-const) (- (* (nozzle-coeff) (^ (pressure) 0.5)) (flow-nozzle)))))  ; normal eq for ENHSP-2020
+    :effect (increase (flow-nozzle) (* #t (* (time-const) (- (* (nozzle-coeff) (max-pressure)) (flow-nozzle)))))  ; max-pressure for VAL to work
+    ; :effect (increase (flow-nozzle) (* #t (* (time-const) (- (* (nozzle-coeff) (^ (pressure) 0.5)) (flow-nozzle)))))  ; normal eq for ENHSP-2020
   )
 
   ; Process to calculate downstream flow rate
@@ -167,9 +156,8 @@
   ; where Q_down = Q_up - Q_nozzle
   (:process flow-down-inc
     :parameters ()
-    :precondition (and
-      (> (flow-up) 0.001))
-    :effect (increase (flow-down) (* #t (* (flow-const) (- (- (flow-up) (flow-nozzle)) (flow-down)))))
+    :precondition (> (flow-up) 0.001)
+    :effect (increase (flow-down) (* #t (* (time-const) (- (- (flow-up) (flow-nozzle)) (flow-down)))))
   )
 
   ; Process to decrease upstream flow rate while pump is off
@@ -180,7 +168,7 @@
     :precondition (and
       (not (pump-on ?p))
       (> (flow-up) 0.001))
-    :effect (decrease (flow-up) (* #t (* (flow-const) (flow-up))))
+    :effect (decrease (flow-up) (* #t (* (time-const) (flow-up))))
   )
 
   ; Process to decrease nozzle flow rate while nozzle is off
@@ -191,7 +179,7 @@
     :precondition (and
       (not (nozzle-on ?n))
       (> (flow-nozzle) 0.001))
-    :effect (decrease (flow-nozzle) (* #t (* (flow-const) (flow-nozzle))))
+    :effect (decrease (flow-nozzle) (* #t (* (time-const) (flow-nozzle))))
   )
 
   ; Process to increase humidity when nozzle is on
@@ -224,25 +212,25 @@
     :precondition (and
       (pump-on ?p)
       (> (pressure) (max-pressure))
-      (not (pump-fault)))
+      (not (pump-fault ?p)))
     :effect (and
       (not (pump-on ?p))
-      (pump-fault))
+      (pump-fault ?p))
   )
 
   ; Event to shut pump off if nozzle is not working
   ; Precondition: upstream flow is > 0 but nozzle flow is 0
   ; Effect: turn pump off, flag nozzle fault
   (:event nozzle-failure
-    :parameters (?p - pump)
+    :parameters (?p - pump ?n - nozzle)
     :precondition (and
       (pump-on ?p)
       (> (flow-up) 0.2)
       (<= (flow-nozzle) 0.05)
-      (not (pump-fault))
-      (not (nozzle-fault)))
+      (not (pump-fault ?p))
+      (not (nozzle-fault ?n)))
     :effect (and
       (not (pump-on ?p))
-      (nozzle-fault))
+      (nozzle-fault ?n))
   )
 )
