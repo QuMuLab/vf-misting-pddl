@@ -47,20 +47,20 @@
 \begin{document}
  \maketitle 
 \section{Domain and Problem}
-{\bf Domain:} vertical\_farm\_misting\\
-{\bf Problem:} misting-easy
-\section{\sloppy Plan: manual.vf.plan}
+{\bf Domain:} vf-misting\\
+{\bf Problem:} misting
+\section{\sloppy Plan: plans/\-nozzle\_fault.plan}
 \subsection{Plan}
 Plan size: 2
 \begin{tabbing}
 \headingtimeaction 
-\atime{4} \> \listrow{\action{(activate-pump main-pump)}}\\
+\atime{4} \> \listrow{\action{(activate-pump pump1 nozzle1)}}\\
 \atime{10} \> \listrow{\action{(finish)}}\\
 \end{tabbing}
 \subsection{Plan To Validate}
 \begin{tabbing}
 \headingtimehappening 
-\atime{4}  \> \listrow{\action{(activate-pump main-pump)}}\\
+\atime{4}  \> \listrow{\action{(activate-pump pump1 nozzle1)}}\\
 \\\atime{10}  \> \listrow{\action{(finish)}}\\
 \end{tabbing}
 
@@ -80,65 +80,65 @@ Plan size: 2
  \> \assignmentcts{(humidity)}{30}{29.2}\\
 \\
 \atime{4} \> \checkhappening\happeningOK\\
- \> \adding{(pump-on main-pump)}\\
+ \> \adding{(pump-on pump1)}\\
 \\
  \atime{4} \> \eventtriggered \\
-\> \aprocessactivated{\action{(pressure-inc main-pump)}}\\
-\> \aprocessactivated{\action{(flow-up-inc main-pump)}}\\
+\> \aprocessactivated{\action{(pressure-inc pump1)}}\\
+\> \aprocessactivated{\action{(flow-up-inc pump1)}}\\
 \\
  \atime{4.2932} \> \checkhappening\happeningOK\\
  \> \function{(sim-time)}{t + 4}\\
- \> \function{(humidity)}{ - 0.2t + 29.2}\\
  \> \function{(pressure)}{-75e^{ - 5t} + 75}\\
+ \> \function{(humidity)}{ - 0.2t + 29.2}\\
  \> \function{(flow-up)}{-0.260025e^{ - 5t} + 0.260025}\\
  \> \assignmentcts{(sim-time)}{4}{4.2932}\\
- \> \assignmentcts{(humidity)}{29.2}{29.1414}\\
  \> \assignmentcts{(pressure)}{0}{57.6868}\\
+ \> \assignmentcts{(humidity)}{29.2}{29.1414}\\
  \> \assignmentcts{(flow-up)}{0}{0.2}\\
 \\
  \atime{4.2932} \> \eventtriggered \\
-\> \aeventtriggered{\action{(nozzle-failure main-pump)}}\\
- \> \deleting{(pump-on main-pump)}\\
- \> \adding{(nozzle-fault)}\\
+\> \aeventtriggered{\action{(nozzle-failure pump1 nozzle1)}}\\
+ \> \deleting{(pump-on pump1)}\\
+ \> \adding{(nozzle-fault nozzle1)}\\
 \\
  \atime{4.2932} \> \eventtriggered \\
-\> \aprocessunactivated{\action{(pressure-inc main-pump)}}\\
-\> \aprocessunactivated{\action{(flow-up-inc main-pump)}}\\
-\> \aprocessactivated{\action{(pressure-dec main-pump)}}\\
-\> \aprocessactivated{\action{(flow-up-dec main-pump)}}\\
+\> \aprocessunactivated{\action{(pressure-inc pump1)}}\\
+\> \aprocessunactivated{\action{(flow-up-inc pump1)}}\\
+\> \aprocessactivated{\action{(pressure-dec pump1)}}\\
+\> \aprocessactivated{\action{(flow-up-dec pump1)}}\\
 \\
  \atime{4.2932} \> \eventtriggered \\
 \> \aprocessactivated{\action{(flow-down-inc)}}\\
 \\
  \atime{5.35287} \> \checkhappening\happeningOK\\
  \> \function{(sim-time)}{t + 4.2932}\\
- \> \function{(humidity)}{ - 0.2t + 29.1414}\\
  \> \function{(pressure)}{57.6868e^{ - 5t}}\\
+ \> \function{(humidity)}{ - 0.2t + 29.1414}\\
  \> \function{(flow-up)}{0.2e^{ - 5t}}\\
  \> \function{(flow-down)}{-0.2e^{ - 5t} + 0.2}\\
  \> \assignmentcts{(sim-time)}{4.2932}{5.35287}\\
- \> \assignmentcts{(humidity)}{29.1414}{28.9294}\\
  \> \assignmentcts{(pressure)}{57.6868}{0.288434}\\
+ \> \assignmentcts{(humidity)}{29.1414}{28.9294}\\
  \> \assignmentcts{(flow-up)}{0.2}{0.001}\\
  \> \assignmentcts{(flow-down)}{0}{0.199}\\
 \\
  \atime{5.35287} \> \eventtriggered \\
-\> \aprocessunactivated{\action{(flow-up-dec main-pump)}}\\
+\> \aprocessunactivated{\action{(flow-up-dec pump1)}}\\
 \> \aprocessunactivated{\action{(flow-down-inc)}}\\
 \\
 \atime{10} \> \checkhappening\happeningOK\\
  \> \function{(sim-time)}{t + 5.35287}\\
- \> \function{(humidity)}{ - 0.2t + 28.9294}\\
  \> \function{(pressure)}{0.288434e^{ - 5t}}\\
+ \> \function{(humidity)}{ - 0.2t + 28.9294}\\
  \> \assignmentcts{(sim-time)}{5.35287}{10}\\
- \> \assignmentcts{(humidity)}{28.9294}{28}\\
  \> \assignmentcts{(pressure)}{0.288434}{2.33843e-11}\\
+ \> \assignmentcts{(humidity)}{28.9294}{28}\\
 \\
 \atime{10} \> \checkhappening\happeningOK\\
  \> \adding{(done)}\\
 \\
  \atime{10} \> \eventtriggered \\
-\> \aprocessunactivated{\action{(pressure-dec main-pump)}}\\
+\> \aprocessunactivated{\action{(pressure-dec pump1)}}\\
 \end{tabbing}
 Plan executed successfully - checking goal\\
 Goal not satisfied
@@ -178,35 +178,6 @@ Satisfy \exprn{(humidity)}$[=28]$ $\geq$ \exprn{(min-humidity)}$[=40]$
 \qbezier(1.54555,0.858641)(1.73629,0.964607)(1.92703,1.07057)
 \qbezier(1.92703,1.07057)(2.76352,1.53529)(3.6,2)
 \end{picture} \caption{Graph of (sim-time).}
-\end{center} \end{figure} 
-%%-----------------------------------------------------------
-%%--------- Graph of (humidity) --------------------------------------------------
-\begin{figure}[!ht] \begin{center} \setlength{\unitlength}{100pt}
-\begin{picture}(3.6,2.32)(0,0)
-\thinlines
-\put(-0.038,0){ \vector(1,0){3.6} }
-\put(3.562,0){ Time }
-\put(-0.038,0){ \vector(0,1){2.2} }
-\put(-0.038,2.1){ Value }
-\put(-0.018,-0.1){ 0 }
-\put(3.562,0){ \line(0,-1){0.05} }
-\put(3.562,-0.1){ 10 }
-\put(-0.038,0){ \line(-1,0){0.05} }
-\put(-0.238,0){ 0 }
-\put(-0.038,2){ \line(-1,0){0.05} }
-\put(-0.338,2){ 30 }
-\put(-0.038,0){ \line(0,-1){0.05} }
-\put(-0.038,0){ \line(0,-1){0.05} }
-\put(1.402,0){ \line(0,-1){0.05} }
-\put(1.50755,0){ \line(0,-1){0.05} }
-\put(1.88903,0){ \line(0,-1){0.05} }
-\put(3.562,0){ \line(0,-1){0.05} }
-\thicklines
-\qbezier(0,2)(0.72,1.97333)(1.44,1.94667)
-\qbezier(1.44,1.94667)(1.49278,1.94471)(1.54555,1.94276)
-\qbezier(1.54555,1.94276)(1.73629,1.93569)(1.92703,1.92863)
-\qbezier(1.92703,1.92863)(2.76352,1.89765)(3.6,1.86667)
-\end{picture} \caption{Graph of (humidity).}
 \end{center} \end{figure} 
 %%-----------------------------------------------------------
 %%--------- Graph of (pressure) --------------------------------------------------
@@ -534,6 +505,35 @@ Satisfy \exprn{(humidity)}$[=28]$ $\geq$ \exprn{(min-humidity)}$[=40]$
 \end{picture} \caption{Graph of (pressure).}
 \end{center} \end{figure} 
 %%-----------------------------------------------------------
+%%--------- Graph of (humidity) --------------------------------------------------
+\begin{figure}[!ht] \begin{center} \setlength{\unitlength}{100pt}
+\begin{picture}(3.6,2.32)(0,0)
+\thinlines
+\put(-0.038,0){ \vector(1,0){3.6} }
+\put(3.562,0){ Time }
+\put(-0.038,0){ \vector(0,1){2.2} }
+\put(-0.038,2.1){ Value }
+\put(-0.018,-0.1){ 0 }
+\put(3.562,0){ \line(0,-1){0.05} }
+\put(3.562,-0.1){ 10 }
+\put(-0.038,0){ \line(-1,0){0.05} }
+\put(-0.238,0){ 0 }
+\put(-0.038,2){ \line(-1,0){0.05} }
+\put(-0.338,2){ 30 }
+\put(-0.038,0){ \line(0,-1){0.05} }
+\put(-0.038,0){ \line(0,-1){0.05} }
+\put(1.402,0){ \line(0,-1){0.05} }
+\put(1.50755,0){ \line(0,-1){0.05} }
+\put(1.88903,0){ \line(0,-1){0.05} }
+\put(3.562,0){ \line(0,-1){0.05} }
+\thicklines
+\qbezier(0,2)(0.72,1.97333)(1.44,1.94667)
+\qbezier(1.44,1.94667)(1.49278,1.94471)(1.54555,1.94276)
+\qbezier(1.54555,1.94276)(1.73629,1.93569)(1.92703,1.92863)
+\qbezier(1.92703,1.92863)(2.76352,1.89765)(3.6,1.86667)
+\end{picture} \caption{Graph of (humidity).}
+\end{center} \end{figure} 
+%%-----------------------------------------------------------
 %%--------- Graph of (flow-up) --------------------------------------------------
 \begin{figure}[!ht] \begin{center} \setlength{\unitlength}{100pt}
 \begin{picture}(3.6,2.32)(0,0)
@@ -709,7 +709,7 @@ Satisfy \exprn{(humidity)}$[=28]$ $\geq$ \exprn{(min-humidity)}$[=40]$
 Row 1
 \begin{tabbing}
 {\bf No} \qquad \= {\bf Time} \qquad \= {\bf Action} \\
-1 \> 4 \> \listrowg{\action{(activate-pump main-pump)}} \\
+1 \> 4 \> \listrowg{\action{(activate-pump pump1 nozzle1)}} \\
 2 \> 10 \> \listrowg{\action{(finish)}} \\
 \end{tabbing}
 %%---------------------------------------------------------
@@ -736,6 +736,6 @@ Row 1
 \end{center} \end{figure} 
 %%-----------------------------------------------------------
 \section{Failed Plans}
-\begin{minipage}[t]{13cm} manual.vf.plan \end{minipage}
+\begin{minipage}[t]{13cm} plans/\-nozzle\_fault.plan \end{minipage}
 
 \end{document}

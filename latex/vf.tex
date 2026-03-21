@@ -47,22 +47,22 @@
 \begin{document}
  \maketitle 
 \section{Domain and Problem}
-{\bf Domain:} vertical\_farm\_misting\\
-{\bf Problem:} misting-easy
-\section{\sloppy Plan: manual.vf.plan}
+{\bf Domain:} vf-misting\\
+{\bf Problem:} misting
+\section{\sloppy Plan: plans/\-manual\_vf.plan}
 \subsection{Plan}
 Plan size: 3
 \begin{tabbing}
 \headingtimeaction 
-\atime{4} \> \listrow{\action{(activate-pump main-pump)}}\\
-\atime{4.1} \> \listrow{\action{(activate-nozzle nozzle1 main-pump)}}\\
+\atime{4} \> \listrow{\action{(activate-pump pump1 nozzle1)}}\\
+\atime{4.1} \> \listrow{\action{(activate-nozzle nozzle1 pump1)}}\\
 \atime{10} \> \listrow{\action{(finish)}}\\
 \end{tabbing}
 \subsection{Plan To Validate}
 \begin{tabbing}
 \headingtimehappening 
-\atime{4}  \> \listrow{\action{(activate-pump main-pump)}}\\
-\\\atime{4.1}  \> \listrow{\action{(activate-nozzle nozzle1 main-pump)}}\\
+\atime{4}  \> \listrow{\action{(activate-pump pump1 nozzle1)}}\\
+\\\atime{4.1}  \> \listrow{\action{(activate-nozzle nozzle1 pump1)}}\\
 \\\atime{10}  \> \listrow{\action{(finish)}}\\
 \end{tabbing}
 
@@ -82,20 +82,20 @@ Plan size: 3
  \> \assignmentcts{(humidity)}{30}{29.2}\\
 \\
 \atime{4} \> \checkhappening\happeningOK\\
- \> \adding{(pump-on main-pump)}\\
+ \> \adding{(pump-on pump1)}\\
 \\
  \atime{4} \> \eventtriggered \\
-\> \aprocessactivated{\action{(pressure-inc main-pump)}}\\
-\> \aprocessactivated{\action{(flow-up-inc main-pump)}}\\
+\> \aprocessactivated{\action{(pressure-inc pump1)}}\\
+\> \aprocessactivated{\action{(flow-up-inc pump1)}}\\
 \\
 \atime{4.1} \> \checkhappening\happeningOK\\
  \> \function{(sim-time)}{t + 4}\\
- \> \function{(humidity)}{ - 0.2t + 29.2}\\
  \> \function{(pressure)}{-75e^{ - 5t} + 75}\\
+ \> \function{(humidity)}{ - 0.2t + 29.2}\\
  \> \function{(flow-up)}{-0.260025e^{ - 5t} + 0.260025}\\
  \> \assignmentcts{(sim-time)}{4}{4.1}\\
- \> \assignmentcts{(humidity)}{29.2}{29.18}\\
  \> \assignmentcts{(pressure)}{0}{29.5102}\\
+ \> \assignmentcts{(humidity)}{29.2}{29.18}\\
  \> \assignmentcts{(flow-up)}{0}{0.102312}\\
 \\
 \atime{4.1} \> \checkhappening\happeningOK\\
@@ -111,14 +111,14 @@ Plan size: 3
 \\
 \atime{10} \> \checkhappening\happeningOK\\
  \> \function{(sim-time)}{t + 4.1}\\
- \> \function{(humidity)}{2t + 29.18}\\
  \> \function{(pressure)}{-45.4898e^{ - 5t} + 75}\\
+ \> \function{(humidity)}{2t + 29.18}\\
  \> \function{(flow-up)}{-0.157713e^{ - 5t} + 0.260025}\\
  \> \function{(flow-nozzle)}{-0.159975e^{ - 5t} + 0.159975}\\
  \> \function{(flow-down)}{-0.102312e^{ - 5t} + 0.102312}\\
  \> \assignmentcts{(sim-time)}{4.1}{10}\\
- \> \assignmentcts{(humidity)}{29.18}{40.98}\\
  \> \assignmentcts{(pressure)}{29.5102}{75}\\
+ \> \assignmentcts{(humidity)}{29.18}{40.98}\\
  \> \assignmentcts{(flow-up)}{0.102312}{0.260025}\\
  \> \assignmentcts{(flow-nozzle)}{0}{0.159975}\\
  \> \assignmentcts{(flow-down)}{0}{0.102312}\\
@@ -155,33 +155,6 @@ Plan executed successfully - checking goal\\
 \qbezier(1.44,0.8)(1.458,0.81)(1.476,0.82)
 \qbezier(1.476,0.82)(2.538,1.41)(3.6,2)
 \end{picture} \caption{Graph of (sim-time).}
-\end{center} \end{figure} 
-%%-----------------------------------------------------------
-%%--------- Graph of (humidity) --------------------------------------------------
-\begin{figure}[!ht] \begin{center} \setlength{\unitlength}{100pt}
-\begin{picture}(3.6,2.32)(0,0)
-\thinlines
-\put(-0.038,0){ \vector(1,0){3.6} }
-\put(3.562,0){ Time }
-\put(-0.038,0){ \vector(0,1){2.2} }
-\put(-0.038,2.1){ Value }
-\put(-0.018,-0.1){ 0 }
-\put(3.562,0){ \line(0,-1){0.05} }
-\put(3.562,-0.1){ 10 }
-\put(-0.038,0){ \line(-1,0){0.05} }
-\put(-0.238,0){ 0 }
-\put(-0.038,2){ \line(-1,0){0.05} }
-\put(-0.338,2){ 40.98 }
-\put(-0.038,0){ \line(0,-1){0.05} }
-\put(-0.038,0){ \line(0,-1){0.05} }
-\put(1.402,0){ \line(0,-1){0.05} }
-\put(1.438,0){ \line(0,-1){0.05} }
-\put(3.562,0){ \line(0,-1){0.05} }
-\thicklines
-\qbezier(0,1.46413)(0.72,1.44461)(1.44,1.42509)
-\qbezier(1.44,1.42509)(1.458,1.4246)(1.476,1.42411)
-\qbezier(1.476,1.42411)(2.538,1.71205)(3.6,2)
-\end{picture} \caption{Graph of (humidity).}
 \end{center} \end{figure} 
 %%-----------------------------------------------------------
 %%--------- Graph of (pressure) --------------------------------------------------
@@ -506,6 +479,33 @@ Plan executed successfully - checking goal\\
 \qbezier(3.5856,2)(3.5892,2)(3.5928,2)
 \qbezier(3.5928,2)(3.5964,2)(3.6,2)
 \end{picture} \caption{Graph of (pressure).}
+\end{center} \end{figure} 
+%%-----------------------------------------------------------
+%%--------- Graph of (humidity) --------------------------------------------------
+\begin{figure}[!ht] \begin{center} \setlength{\unitlength}{100pt}
+\begin{picture}(3.6,2.32)(0,0)
+\thinlines
+\put(-0.038,0){ \vector(1,0){3.6} }
+\put(3.562,0){ Time }
+\put(-0.038,0){ \vector(0,1){2.2} }
+\put(-0.038,2.1){ Value }
+\put(-0.018,-0.1){ 0 }
+\put(3.562,0){ \line(0,-1){0.05} }
+\put(3.562,-0.1){ 10 }
+\put(-0.038,0){ \line(-1,0){0.05} }
+\put(-0.238,0){ 0 }
+\put(-0.038,2){ \line(-1,0){0.05} }
+\put(-0.338,2){ 40.98 }
+\put(-0.038,0){ \line(0,-1){0.05} }
+\put(-0.038,0){ \line(0,-1){0.05} }
+\put(1.402,0){ \line(0,-1){0.05} }
+\put(1.438,0){ \line(0,-1){0.05} }
+\put(3.562,0){ \line(0,-1){0.05} }
+\thicklines
+\qbezier(0,1.46413)(0.72,1.44461)(1.44,1.42509)
+\qbezier(1.44,1.42509)(1.458,1.4246)(1.476,1.42411)
+\qbezier(1.476,1.42411)(2.538,1.71205)(3.6,2)
+\end{picture} \caption{Graph of (humidity).}
 \end{center} \end{figure} 
 %%-----------------------------------------------------------
 %%--------- Graph of (flow-up) --------------------------------------------------
@@ -1473,8 +1473,8 @@ Plan executed successfully - checking goal\\
 Row 1
 \begin{tabbing}
 {\bf No} \qquad \= {\bf Time} \qquad \= {\bf Action} \\
-1 \> 4 \> \listrowg{\action{(activate-pump main-pump)}} \\
-2 \> 4.1 \> \listrowg{\action{(activate-nozzle nozzle1 main-pump)}} \\
+1 \> 4 \> \listrowg{\action{(activate-pump pump1 nozzle1)}} \\
+2 \> 4.1 \> \listrowg{\action{(activate-nozzle nozzle1 pump1)}} \\
 3 \> 10 \> \listrowg{\action{(finish)}} \\
 \end{tabbing}
 %%---------------------------------------------------------
@@ -1507,7 +1507,7 @@ Row 1
 \section{Successful Plans}
 \begin{tabbing}
 {\bf Value} \qquad \= {\bf Plan}\\[0.8ex]
-3 \>\begin{minipage}[t]{12cm} manual.vf.plan 3  \end{minipage}\\
+3 \>\begin{minipage}[t]{12cm} plans/\-manual\_vf.plan 3  \end{minipage}\\
  \>\\
 \end{tabbing}
 

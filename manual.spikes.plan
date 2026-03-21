@@ -1,3 +1,0 @@
-4.0: (activate-pump main-pump nozzle1)
-4.1: (activate-nozzle nozzle1 main-pump)
-10.0: (finish)

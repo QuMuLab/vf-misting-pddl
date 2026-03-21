@@ -1,18 +1,18 @@
 (define (problem misting)
 
-  (:domain vertical_farm_misting)
+  (:domain vf-misting)
 
   (:objects
-    ; Medium configuration is one pump connected to 1 nozzle in a loop
-    main-pump - pump
+    ; Configuration is one pump connected to 1 nozzle in a loop
+    pump1 - pump
     nozzle1 - nozzle
   )
 
   (:init
     ; Objects
-    (not (pump-on main-pump))
+    (not (pump-on pump1))
     (not (nozzle-on nozzle1))
-    (not (pump-fault main-pump))
+    (not (pump-fault pump1))
     (not (nozzle-fault nozzle1))
     (not (done))
 
@@ -30,8 +30,10 @@
 
     (= (time-const) 5)
 
-    (= (up-coeff) 0.003467) ; (= (up-coeff) 0.022766) for sqrt
-    (= (nozzle-coeff) 0.002133) ; (= (nozzle-coeff) 0.011383) for sqrt
+    (= (sensor-coeff) 0.003467) ; Coeff for VAL
+    (= (nozzle-coeff) 0.002133) ; Coeff for VAL
+    ; (= (sensor-coeff) 0.022766) ; Coeff for ENHSP-2020
+    ; (= (nozzle-coeff) 0.011383) ; Coeff for ENHSP-2020
 
     (= (min-humidity) 40)
     (= (max-humidity) 60)
