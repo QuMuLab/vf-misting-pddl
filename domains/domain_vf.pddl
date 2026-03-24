@@ -8,16 +8,20 @@
 
   (:predicates
     (pump-on ?p - pump) ; Pump on or off
-    (nozzle-on ?n - nozzle) ; Nozzle on or off
-    (done) ; Special predicate for goal state
+    (pump-ramping-up ?p - pump) ; Pump is starting
+    (pump-ramping-down ?p - pump) ; Pump is stopping
 
-    (nozzle-fault ?n - nozzle) ; Issue with nozzle
-    (pump-fault ?p - pump) ; Issue with pump
+    (nozzle-on ?n - nozzle) ; Nozzle on or off
+    (nozzle-clogged ?n - nozzle) ; Issue with nozzle
+    
+    (done) ; Special predicate for goal state
   )
 
   (:functions
     ; Variables
     (sim-time) ; Simulation time, s
+    (pump-level ?p - pump) ; Ranges from 0 (fully off) to 1 (fully on)
+
     (pressure) ; Pressure, psi
     (humidity) ; Current humidity, %
 
@@ -26,33 +30,36 @@
     (flow-nozzle) ; Branch flow rate, L/min
 
     ; Constants
+    (done-time) ; Time for done predicate, s
     (max-pressure) ; Max pressure, psi
 
     (time-const) ; Time constant for calculations
-
     (sensor-coeff) ; Upstream sensor coefficient
     (nozzle-coeff) ; Nozzle coefficient
 
-    (min-humidity) ; Min humidity, %
-    (max-humidity) ; Max humidity, %
+    (max-humidity)
+    (min-humidity)
 
     ; Rates
+    (pump-level-rate)
+
     (humidity-inc-rate) ; Rate of humidity increase, %/s
-    (humidity-dec-rate) ; Rate of humidity decrease, %/s
+    (humidity-dec-rate) ; Rate of humidity decrease, %/s  
   )
 
   ; Actions
 
   ; Action to activate the pump
-  ; Precondition: pump is not on, pump and nozzle are not faulty
+  ; Precondition: pump is not on
   ; Effect: pump is on
   (:action activate-pump
-    :parameters (?p - pump ?n - nozzle)
+    :parameters (?p - pump)
     :precondition (and
       (not (pump-on ?p))
-      (not (pump-fault ?p))
-      (not (nozzle-fault ?n)))
-    :effect (pump-on ?p)
+      (< (pump-level ?p) 1))
+    :effect (and
+      (pump-ramping-up ?p)
+      (pump-on ?p))
   )
 
   ; Action to deactivate the pump
@@ -60,8 +67,12 @@
   ; Effect: pump is not on
   (:action deactivate-pump
     :parameters (?p - pump)
-    :precondition (pump-on ?p)
-    :effect (not (pump-on ?p))
+    :precondition (and
+      (pump-on ?p)
+      (> (pump-level ?p) 0))
+    :effect (and
+      (pump-ramping-down ?p)
+      (not (pump-on ?p)))
   )
 
   ; Action to activate the nozzle
@@ -89,7 +100,7 @@
   ; Effect: done predicate is true
   (:action finish
     :parameters ()
-    :precondition (>= (sim-time) 10)
+    :precondition (>= (sim-time) (done-time))
     :effect (done)
   )
 
@@ -100,86 +111,149 @@
   ; Effect: increase simulation time over time
   (:process time-inc
     :parameters ()
-    :precondition (< (sim-time) 10)
+    :precondition (< (sim-time) (done-time))
     :effect (increase (sim-time) (* #t 1))
+  )
+
+  ; Process to increase pump level as it's turning on
+  ; Precondition: pump is on and ramping up, but not fully on
+  ; Effect: increase pump level by pump level rate
+  (:process pump-ramp-up
+    :parameters (?p - pump)
+    :precondition (and
+      (pump-on ?p)
+      (pump-ramping-up ?p)
+      (< (pump-level ?p) 1))
+    :effect
+      (increase (pump-level ?p)
+        (* #t  (pump-level-rate)))
+  )
+
+  ; Process to decrease pump level as it's turning off
+  ; Precondition: pump is off and ramping down, but not fully off
+  ; Effect: decrease pump level by pump level rate
+  (:process pump-ramp-down
+    :parameters (?p - pump)
+    :precondition (and
+      (not (pump-on ?p))
+      (pump-ramping-down ?p)
+      (> (pump-level ?p) 0.001))
+    :effect
+      (decrease (pump-level ?p)
+        (* #t (pump-level-rate)))
   )
 
   ; Process to increase pressure while the pump is on
   ; Precondition: pump is on, pressure is less than max pressure
-  ; Effect: increase pressure over time according to dP/dt = k_time * (Pmax - P)
+  ; Effect: increase pressure over time according to dP/dt = k_time * pump_level * (Pmax - P)
   (:process pressure-inc
     :parameters (?p - pump)
     :precondition (and
       (pump-on ?p)
       (< (pressure) (max-pressure)))
-    :effect (increase (pressure) (* #t (* (time-const) (- (max-pressure) (pressure)))))
+    :effect (increase (pressure)
+      (* #t (* (* (time-const) (pump-level ?p))
+        (- (max-pressure) (pressure)))))
   )
 
   ; Process to decrease pressure while the pump is off
   ; Precondition: pump is off, pressure is over 0
-  ; Effect: decrease pressure over time according to dP/dt = -k_time * P
+  ; Effect: decrease pressure over time according to dP/dt = -k_time * (1 - pump_level) * P
   (:process pressure-dec
     :parameters (?p - pump)
     :precondition (and
       (not (pump-on ?p))
       (> (pressure) 0.001))
-    :effect (decrease (pressure) (* #t (* (time-const) (pressure))))
+    :effect (decrease (pressure) (* #t
+      (* (* (time-const) (- 1 (pump-level ?p)))
+        (pressure))))
   )
 
   ; Process to increase upstream flow rate while pump is on
   ; Precondition: pump is on
-  ; Effect: increase upstream flow rate over time according to dQ/dt = k_time * (Q_target - Q_up)
+  ; Effect: increase upstream flow rate over time according to dQ/dt = k_time * pump_level * (Q_target - Q_up)
   ; where Q_target = k_sensor * sqrt(pressure) or k_sensor * pressure
   (:process flow-up-inc
     :parameters (?p - pump)
     :precondition (pump-on ?p)
-    :effect (increase (flow-up) (* #t (* (time-const) (- (* (sensor-coeff) (max-pressure)) (flow-up)))))  ; Equation for VAL
-    ; :effect (increase (flow-up) (* #t (* (time-const) (- (* (sensor-coeff) (^ (pressure) 0.5)) (flow-up)))))  ; Equation for ENHSP-2020
-  )
-
-  ; Process to increase nozzle flow rate while nozzle is on
-  ; Precondition: nozzle is on, upstream flow is larger than nozzle flow
-  ; Effect: increase nozzle flow rate over time according to dQ/dt = k_time * (Q_target - Q_nozzle)
-  ; where Q_target = k_nozzle * sqrt(pressure) or k_sensor * pressure
-  (:process flow-nozzle-inc
-    :parameters (?n - nozzle)
-    :precondition (and
-      (nozzle-on ?n)
-      (> (flow-up) (flow-nozzle)))
-    :effect (increase (flow-nozzle) (* #t (* (time-const) (- (* (nozzle-coeff) (max-pressure)) (flow-nozzle)))))  ; Equation for VAL
-    ; :effect (increase (flow-nozzle) (* #t (* (time-const) (- (* (nozzle-coeff) (^ (pressure) 0.5)) (flow-nozzle)))))  ; Equation for ENHSP-2020
-  )
-
-  ; Process to calculate downstream flow rate
-  ; Precondition: upstream flow is over 0
-  ; Effect: calculate downstream flow rate over time according to dQ/dt = k_time * (Q_target - Q_down)
-  ; where Q_target = Q_up - Q_nozzle
-  (:process flow-down-inc
-    :parameters ()
-    :precondition (> (flow-up) 0.001)
-    :effect (increase (flow-down) (* #t (* (time-const) (- (- (flow-up) (flow-nozzle)) (flow-down)))))
+    ; :effect (increase (flow-up) (* #t (* (* (time-const) (pump-level ?p)) (- (* (sensor-coeff) (^ (pressure) 0.5)) (flow-up)))))  ; Equation for ENHSP-2020
+    :effect (increase (flow-up) (* #t (* (* (time-const) (pump-level ?p)) (- (* (sensor-coeff) (max-pressure)) (flow-up)))))  ; Equation for VAL
   )
 
   ; Process to decrease upstream flow rate while pump is off
   ; Precondition: pump is not on, upstream flow rate is slightly above 0
-  ; Effect: decrease upstream flow rate over time according to dQ/dt = -k_time * Q_up
+  ; Effect: decrease upstream flow rate over time according to dQ/dt = -k_time * (1 - pump_level) * Q_up
   (:process flow-up-dec
     :parameters (?p - pump)
     :precondition (and
       (not (pump-on ?p))
       (> (flow-up) 0.001))
-    :effect (decrease (flow-up) (* #t (* (time-const) (flow-up))))
+    :effect (decrease (flow-up) (* #t (* (* (time-const) (- 1 (pump-level ?p))) (flow-up))))
+  )
+
+  ; Process to increase nozzle flow rate while nozzle is on
+  ; Precondition: nozzle is on, upstream flow is larger than nozzle flow
+  ; Effect: increase nozzle flow rate over time according to dQ/dt = k_time * pump_level * (Q_target - Q_nozzle)
+  ; where Q_target = k_nozzle * sqrt(pressure) or k_sensor * pressure
+  (:process flow-nozzle-inc
+    :parameters (?n - nozzle ?p - pump)
+    :precondition (and
+      (pump-on ?p)
+      (nozzle-on ?n)
+      (not (nozzle-clogged ?n))
+      (> (flow-up) (flow-nozzle)))
+    ; :effect (increase (flow-nozzle) (* #t (* (time-const) (pump-level ?p)) (- (* (nozzle-coeff) (^ (pressure) 0.5)) (flow-nozzle)))))  ; Equation for ENHSP-2020
+    :effect (increase (flow-nozzle) (* #t (* (* (time-const) (pump-level ?p)) (- (* (nozzle-coeff) (max-pressure)) (flow-nozzle)))))  ; Equation for VAL
   )
 
   ; Process to decrease nozzle flow rate while nozzle is off
   ; Precondition: nozzle is not on, nozzle flow rate is above 0
-  ; Effect: decrease nozzle flow rate over time according to dQ/dt = -k_time * Q_nozzle
+  ; Effect: decrease nozzle flow rate over time according to dQ/dt = -k_time * (1 - pump_level) * Q_nozzle
   (:process flow-nozzle-dec
-    :parameters (?n - nozzle)
+    :parameters (?n - nozzle ?p - pump)
     :precondition (and
+      (not (pump-on ?p))
       (not (nozzle-on ?n))
+      (not (nozzle-clogged ?n))
       (> (flow-nozzle) 0.001))
-    :effect (decrease (flow-nozzle) (* #t (* (time-const) (flow-nozzle))))
+    :effect (decrease (flow-nozzle) (* #t (* (* (time-const) (- 1 (pump-level ?p))) (flow-nozzle))))
+  )
+
+  ; Process to increase downstream flow rate
+  ; Precondition: pump is on
+  ; Effect: calculate downstream flow rate over time according to dQ/dt = k_time * pump_level * (Q_target - Q_down)
+  ; where Q_target = Q_up - Q_nozzle
+  (:process flow-down-inc
+    :parameters (?n - nozzle ?p - pump)
+    :precondition (and
+      (pump-on ?p)
+      (not (nozzle-clogged ?n)))
+    ; :effect (increase (flow-down) (* #t (* (time-const) (pump-level ?p)) (- (* (- (sensor-coeff) (nozzle-coeff)) (^ (pressure) 0.5)) (flow-down)))))  ; Equation for ENHSP-2020
+    :effect (increase (flow-down) (* #t (* (* (time-const) (pump-level ?p)) (- (* (- (sensor-coeff) (nozzle-coeff)) (max-pressure)) (flow-down)))))  ; Equation for VAL
+  )
+
+  ; Process to increase downstream flow rate
+  ; Precondition: pump is on
+  ; Effect: calculate downstream flow rate over time according to dQ/dt = k_time * pump_level * (Q_target - Q_down)
+  ; where Q_target = Q_up
+  (:process flow-down-inc-clogged
+    :parameters (?n - nozzle ?p - pump)
+    :precondition (and
+      (pump-on ?p)
+      (nozzle-clogged ?n))
+    ; :effect (increase (flow-down) (* #t (* (time-const) (pump-level ?p)) (- (* (sensor-coeff) (^ (pressure) 0.5)) (flow-down)))))  ; Equation for ENHSP-2020
+    :effect (increase (flow-down) (* #t (* (* (time-const) (pump-level ?p)) (- (* (sensor-coeff) (max-pressure)) (flow-down)))))  ; Equation for VAL
+  )
+
+  ; Process to decrease downstream flow rate
+  ; Precondition: upstream flow is over 0
+  ; Effect: calculate downstream flow rate over time according to dQ/dt = -k_time * (1 - pump_level) * Q_down
+  (:process flow-down-dec
+    :parameters (?p - pump)
+    :precondition (and
+      (not (pump-on ?p))
+      (> (flow-down) 0.001))
+    :effect (decrease (flow-down) (* #t (* (* (time-const) (- 1 (pump-level ?p))) (flow-down))))
   )
 
   ; Process to increase humidity when nozzle is on
@@ -202,34 +276,27 @@
     :effect (decrease (humidity) (* #t (humidity-dec-rate)))
   )
 
-  ; Events for VAL
+  ; Events
 
-  ; Event to shut pump off if pressure exceeds max pressure
-  ; Precondition: pressure exceeds max pressure
-  ; Effect: turn pump off, flag pump fault
-  (:event pump-failure
+  ; Event to stop pump level increase when it reaches 1
+  ; Precondition: pump ramps up to 1
+  ; Effect: stop pump ramping up
+  (:event stop-ramp-up
     :parameters (?p - pump)
     :precondition (and
-      (pump-on ?p)
-      (> (pressure) (max-pressure))
-      (not (pump-fault ?p)))
-    :effect (and
-      (not (pump-on ?p))
-      (pump-fault ?p))
+      (pump-ramping-up ?p)
+      (>= (pump-level ?p) 1))
+    :effect (not (pump-ramping-up ?p))
   )
 
-  ; Event to shut pump off if nozzle is not working
-  ; Precondition: upstream flow is > 0 but nozzle flow is 0
-  ; Effect: turn pump off, flag nozzle fault
-  (:event nozzle-failure
-    :parameters (?p - pump ?n - nozzle)
+  ; Event to stop pump level decrease when is reaches 0
+  ; Precondition: pump ramps down to 0
+  ; Effect: stop pump ramping down
+  (:event stop-ramp-down
+    :parameters (?p - pump)
     :precondition (and
-      (pump-on ?p)
-      (> (flow-up) 0.2)
-      (<= (flow-nozzle) 0.05)
-      (not (nozzle-fault ?n)))
-    :effect (and
-      (not (pump-on ?p))
-      (nozzle-fault ?n))
+      (pump-ramping-down ?p)
+      (<= (pump-level ?p) 0))
+    :effect (not (pump-ramping-down ?p))
   )
 )

@@ -54,14 +54,14 @@
 Plan size: 3
 \begin{tabbing}
 \headingtimeaction 
-\atime{4} \> \listrow{\action{(activate-pump pump1 nozzle1)}}\\
+\atime{4} \> \listrow{\action{(activate-pump pump1)}}\\
 \atime{4.1} \> \listrow{\action{(activate-nozzle nozzle1 pump1)}}\\
 \atime{10} \> \listrow{\action{(finish)}}\\
 \end{tabbing}
 \subsection{Plan To Validate}
 \begin{tabbing}
 \headingtimehappening 
-\atime{4}  \> \listrow{\action{(activate-pump pump1 nozzle1)}}\\
+\atime{4}  \> \listrow{\action{(activate-pump pump1)}}\\
 \\\atime{4.1}  \> \listrow{\action{(activate-nozzle nozzle1 pump1)}}\\
 \\\atime{10}  \> \listrow{\action{(finish)}}\\
 \end{tabbing}
@@ -1473,7 +1473,7 @@ Plan executed successfully - checking goal\\
 Row 1
 \begin{tabbing}
 {\bf No} \qquad \= {\bf Time} \qquad \= {\bf Action} \\
-1 \> 4 \> \listrowg{\action{(activate-pump pump1 nozzle1)}} \\
+1 \> 4 \> \listrowg{\action{(activate-pump pump1)}} \\
 2 \> 4.1 \> \listrowg{\action{(activate-nozzle nozzle1 pump1)}} \\
 3 \> 10 \> \listrowg{\action{(finish)}} \\
 \end{tabbing}

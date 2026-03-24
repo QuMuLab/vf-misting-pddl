@@ -49,20 +49,24 @@
 \section{Domain and Problem}
 {\bf Domain:} vf-misting-spikes\\
 {\bf Problem:} misting-spikes
-\section{\sloppy Plan: plans/\-manual\_spikes.plan}
+\section{\sloppy Plan: plans/\-manual\_dec.plan}
 \subsection{Plan}
-Plan size: 3
+Plan size: 5
 \begin{tabbing}
 \headingtimeaction 
-\atime{4} \> \listrow{\action{(activate-pump pump1 nozzle1)}}\\
-\atime{4.1} \> \listrow{\action{(activate-nozzle nozzle1 pump1)}}\\
+\atime{1} \> \listrow{\action{(activate-pump pump1)}}\\
+\atime{1.1} \> \listrow{\action{(activate-nozzle nozzle1 pump1)}}\\
+\atime{7} \> \listrow{\action{(deactivate-pump pump1)}}\\
+\atime{7.1} \> \listrow{\action{(deactivate-nozzle nozzle1)}}\\
 \atime{10} \> \listrow{\action{(finish)}}\\
 \end{tabbing}
 \subsection{Plan To Validate}
 \begin{tabbing}
 \headingtimehappening 
-\atime{4}  \> \listrow{\action{(activate-pump pump1 nozzle1)}}\\
-\\\atime{4.1}  \> \listrow{\action{(activate-nozzle nozzle1 pump1)}}\\
+\atime{1}  \> \listrow{\action{(activate-pump)}}\\
+\\\atime{1.1}  \> \listrow{\action{(activate-nozzle)}}\\
+\\\atime{7}  \> \listrow{\action{(deactivate-pump)}}\\
+\\\atime{7.1}  \> \listrow{\action{(deactivate-nozzle)}}\\
 \\\atime{10}  \> \listrow{\action{(finish)}}\\
 \end{tabbing}
 
@@ -72,20 +76,7 @@ Plan size: 3
 \\
  \atime{0} \> \eventtriggered \\
 \> \aprocessactivated{\action{(time-inc)}}\\
-\> \aprocessactivated{\action{(humidity-dec nozzle1)}}\\
-
-\\
- \atime{4} \> \checkhappening\happeningOK\\
- \> \function{(sim-time)}{t}\\
- \> \function{(humidity)}{ - 0.2t + 30}\\
- \> \assignmentcts{(sim-time)}{0}{4}\\
- \> \assignmentcts{(humidity)}{30}{29.2}\\
-\\
-\atime{4} \> \checkhappening\happeningOK\\
- \> \adding{(pump-on pump1)}\\
-\\
- \atime{4} \> \eventtriggered \\
-\> \aprocessactivated{\action{(pressure-inc pump1)}}\\
+\> \aprocessactivated{\action{(pump-off)}}\\
 \error \\
 \end{tabbing}
 Error occurred in validation attempt:\\
@@ -95,9 +86,11 @@ Error occurred in validation attempt:\\
 Row 1
 \begin{tabbing}
 {\bf No} \qquad \= {\bf Time} \qquad \= {\bf Action} \\
-1 \> 4 \> \listrowg{\action{(activate-pump pump1 nozzle1)}} \\
-2 \> 4.1 \> \listrowg{\action{(activate-nozzle nozzle1 pump1)}} \\
-3 \> 10 \> \listrowg{\action{(finish)}} \\
+1 \> 1 \> \listrowg{\action{(activate-pump)}} \\
+2 \> 1.1 \> \listrowg{\action{(activate-nozzle)}} \\
+3 \> 7 \> \listrowg{\action{(deactivate-pump)}} \\
+4 \> 7.1 \> \listrowg{\action{(deactivate-nozzle)}} \\
+5 \> 10 \> \listrowg{\action{(finish)}} \\
 \end{tabbing}
 %%---------------------------------------------------------
 \begin{figure} \begin{center} \setlength{\unitlength}{80pt}
@@ -110,23 +103,31 @@ Row 1
 \put(-0.158,6.53){\begin{sideways} 10 \end{sideways}}
 \put(2.25,-0.15){\begin{sideways}1 \end{sideways}}
 \normalcolor
-\put(-0.038,2.592){ \line(-1,0){0.05} }
-\put(-0.038,2.6568){ \line(-1,0){0.05} }
+\put(-0.038,0.648){ \line(-1,0){0.05} }
+\put(-0.038,0.7128){ \line(-1,0){0.05} }
+\put(-0.038,4.536){ \line(-1,0){0.05} }
+\put(-0.038,4.6008){ \line(-1,0){0.05} }
 \normalcolor
-\put(4.5,2.592){ \line(-1,0){0.16875} }
-\put(4.28125,2.542){\framebox(0.1,0.1)[l]{ \begin{sideways} {\tiny 1  } \end{sideways}}}
-\put(4.23125,2.592){ \line(-1,0){3.78125} }
-\put(4.5,2.6568){ \line(-1,0){0.3375} }
-\put(4.1125,2.6068){\framebox(0.1,0.1)[l]{ \begin{sideways} {\tiny 2  } \end{sideways}}}
-\put(4.0625,2.6568){ \line(-1,0){3.6125} }
-\put(4.5,6.48){ \line(-1,0){0.50625} }
-\put(3.94375,6.43){\framebox(0.1,0.1)[l]{ \begin{sideways} {\tiny 3  } \end{sideways}}}
-\put(3.89375,6.48){ \line(-1,0){3.44375} }
+\put(4.5,0.648){ \line(-1,0){0.16875} }
+\put(4.28125,0.598){\framebox(0.1,0.1)[l]{ \begin{sideways} {\tiny 1  } \end{sideways}}}
+\put(4.23125,0.648){ \line(-1,0){3.78125} }
+\put(4.5,0.7128){ \line(-1,0){0.3375} }
+\put(4.1125,0.6628){\framebox(0.1,0.1)[l]{ \begin{sideways} {\tiny 2  } \end{sideways}}}
+\put(4.0625,0.7128){ \line(-1,0){3.6125} }
+\put(4.5,4.536){ \line(-1,0){0.50625} }
+\put(3.94375,4.486){\framebox(0.1,0.1)[l]{ \begin{sideways} {\tiny 3  } \end{sideways}}}
+\put(3.89375,4.536){ \line(-1,0){3.44375} }
+\put(4.5,4.6008){ \line(-1,0){0.675} }
+\put(3.775,4.5508){\framebox(0.1,0.1)[l]{ \begin{sideways} {\tiny 4  } \end{sideways}}}
+\put(3.725,4.6008){ \line(-1,0){3.275} }
+\put(4.5,6.48){ \line(-1,0){0.84375} }
+\put(3.60625,6.43){\framebox(0.1,0.1)[l]{ \begin{sideways} {\tiny 5  } \end{sideways}}}
+\put(3.55625,6.48){ \line(-1,0){3.10625} }
 \normalcolor
 \put(4.6,2.6){\rotcaption{Gantt Chart}} \end{picture} 
 \end{center} \end{figure} 
 %%-----------------------------------------------------------
 \section{Queries (validator failed)}
-\begin{minipage}[t]{13cm} plans/\-manual\_spikes.plan \end{minipage}
+\begin{minipage}[t]{13cm} plans/\-manual\_dec.plan \end{minipage}
 
 \end{document}
