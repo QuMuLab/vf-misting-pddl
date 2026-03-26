@@ -227,6 +227,7 @@
     :parameters (?n - nozzle ?p - pump)
     :precondition (and
       (pump-on ?p)
+      (nozzle-on ?n)
       (not (nozzle-clogged ?n)))
     ; :effect (increase (flow-down) (* #t (* (time-const) (pump-level ?p)) (- (* (- (sensor-coeff) (nozzle-coeff)) (^ (pressure) 0.5)) (flow-down)))))  ; Equation for ENHSP-2020
     :effect (increase (flow-down) (* #t (* (* (time-const) (pump-level ?p)) (- (* (- (sensor-coeff) (nozzle-coeff)) (max-pressure)) (flow-down)))))  ; Equation for VAL

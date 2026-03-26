@@ -4,7 +4,7 @@
 // Constants
 const int sensorPin1 = 2; // Pin connected to first flow sensor signal
 const int sensorPin2 = 3; // Pin connected to second flow sensor signal
-const float calibrationFactor = 1380.0; // Calibration factor using F = 23Q, specified on the sensor
+const float calibrationFactor = 23.0; // Calibration factor using F = 23Q, specified on the sensor
 
 // Variables
 volatile unsigned long pulseCount1 = 0; // Pulse counter per second for first sensor
@@ -59,12 +59,12 @@ void loop() {
     interrupts();
 
     // Calculate flow rate (L/min)
-    flowRate1 = (pulses1 / calibrationFactor) * 60.0;
-    flowRate2 = (pulses2 / calibrationFactor) * 60.0;
+    flowRate1 = pulses1 / calibrationFactor;
+    flowRate2 = pulses2 / calibrationFactor;
 
     // Calculate total volume (L)
-    totalVolume1 += (pulses1 / calibrationFactor);
-    totalVolume2 += (pulses2 / calibrationFactor);
+    totalVolume1 += pulses1 / (calibrationFactor * 60.0);
+    totalVolume2 += pulses2 / (calibrationFactor * 60.0);
 
     // Output
     Serial.print("Sensor 1 (before nozzle) | ");

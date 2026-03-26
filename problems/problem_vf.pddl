@@ -37,12 +37,12 @@
     (= (time-const) 5)
 
     ; Coeffs for ENHSP-2020
-    ; (= (sensor-coeff) 0.022766)
-    ; (= (nozzle-coeff) 0.011383)
+    ; (= (sensor-coeff) 0.030022)
+    ; (= (nozzle-coeff) 0.011547)
 
     ; Coeffs for VAL
     (= (sensor-coeff) 0.003467)
-    (= (nozzle-coeff) 0.002133)
+    (= (nozzle-coeff) 0.001333)
 
     (= (min-humidity) 40)
     (= (max-humidity) 60)
