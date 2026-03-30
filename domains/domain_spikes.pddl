@@ -7,13 +7,13 @@
   )
 
   (:predicates
+    (done) ; Special predicate for goal state
+
     (pump-on ?p - pump) ; Pump on or off
     (pump-ramping-up ?p - pump) ; Pump is starting
     (pump-ramping-down ?p - pump) ; Pump is stopping
 
     (nozzle-on ?n - nozzle) ; Nozzle on or off
-    
-    (done) ; Special predicate for goal state
   )
 
   (:functions
@@ -22,28 +22,29 @@
     (pump-level ?p - pump) ; Ranges from 0 (fully off) to 1 (fully on)
 
     (pressure) ; Pressure, Pa
-    (humidity) ; Current humidity, %
 
     (flow-up) ; Upstream flow rate, m^3/s
-    (flow-nozzle) ; Branch flow rate, m^3/s
     (flow-down) ; Downstream flow rate, m^3/s
+
+    (humidity) ; Current humidity, %
 
     ; Constants
     (done-time) ; Time for done predicate, s
+
     (max-pressure) ; Max pressure, Pa
 
-    (k-pressure) ; beta / V, water resistance to compression / tube volume, Pa/m^3
-    (L-up) ; 1 / upstream inertia
-    (L-down) ; 1 / downstream inertia
-    (R-up) ; Upstream resistance
-    (R-down) ; Downstream resistance
+    (k-pressure) ; beta/V, water resistance to compression/tube volume
+    (inertia-up) ; 1/upstream inertia
+    (inertia-down) ; 1/downstream inertia
+    (resistance-up) ; Upstream resistance
+    (resistance-down) ; Downstream resistance
     (k-nozzle) ; Nozzle coefficient
 
-    (max-humidity)
-    (min-humidity)
+    (max-humidity) ; Minimum humidity level for the goal state, %
+    (min-humidity) ; Maximum humidity level for the goal state, %
 
     ; Rates
-    (pump-level-rate)
+    (pump-level-rate) ; Rate of pump level increase
 
     (humidity-inc-rate) ; Rate of humidity increase, %/s
     (humidity-dec-rate) ; Rate of humidity decrease, %/s  
@@ -52,8 +53,8 @@
   ; Actions
 
   ; Action to activate the pump
-  ; Precondition: pump is not on
-  ; Effect: pump is on
+  ; Precondition: pump is not on, pump level is not fully on
+  ; Effect: pump is ramping up and on
   (:action activate-pump
     :parameters (?p - pump)
     :precondition (and
@@ -65,8 +66,8 @@
   )
 
   ; Action to deactivate the pump
-  ; Precondition: pump is on
-  ; Effect: pump is not on
+  ; Precondition: pump is on, pump level is not fully off
+  ; Effect: pump is ramping down and not on
   (:action deactivate-pump
     :parameters (?p - pump)
     :precondition (and
@@ -97,8 +98,8 @@
     :effect (not (nozzle-on ?n))
   )
 
-  ; Action to set the done state when simulation time reaches 10 seconds
-  ; Precondition: simulation time is 10 or more seconds
+  ; Action to set the done state when simulation time reaches a set time
+  ; Precondition: simulation time is equal to or more than the set time
   ; Effect: done predicate is true
   (:action finish
     :parameters ()
@@ -109,7 +110,7 @@
   ; Processes
 
   ; Process to increase time
-  ; Precondition: simulation time is less than 10 seconds
+  ; Precondition: simulation time is less than the set time
   ; Effect: increase simulation time over time
   (:process time-inc
     :parameters ()
@@ -147,8 +148,8 @@
 
   ; Process to calculate pressure
   ; Precondition: pressure is greater than or equal to 0
-  ; Effect: increase pressure over time according to dP/dt = (beta / V) * (flow-up - flow-down - flow-nozzle)
-  ; where flow-nozzle = k-nozzle * sqrt(pressure)
+  ; Effect: increase pressure over time according to dP/dt = k-pressure * (flow-up - flow-down - flow-nozzle)
+  ; where flow-nozzle = k-nozzle * sqrt(P), or k-nozzle * P if linearized
   (:process pressure-calc
     :parameters ()
     :precondition (>= (pressure) 0)
@@ -158,26 +159,26 @@
 
   ; Process to calculate upstream flow rate
   ; Precondition: pressure is greater than or equal to 0
-  ; Effect: increase upstream flow rate over time according to dQ-up/dt = L-up * (P-pump - P - R_up * Q_up)
-  ; where P_pump = P_max * pump_level
+  ; Effect: increase upstream flow rate over time according to dQ-up/dt = inertia-up * (P-pump - P - resistance-up * Q-up)
+  ; where P-pump = max-pressure * pump-level
   (:process flow-up-calc
     :parameters ()
     :precondition (>= (pressure) 0)
-    :effect (increase (flow-up) (* #t (* (L-up) (- (* (max-pressure) (pump-level)) (+ (pressure) (* (R-up) (flow-up)))))))
+    :effect (increase (flow-up) (* #t (* (inertia-up) (- (* (max-pressure) (pump-level)) (+ (pressure) (* (resistance-up) (flow-up)))))))
   )
 
   ; Process to calculate downstream flow rate
   ; Precondition: pressure is greater than or equal to 0
-  ; Effect: increase downstream flow rate over time according to dQ-down/dt = L-down * (P - R_down * Q_down)
+  ; Effect: increase downstream flow rate over time according to dQ-down/dt = inertia-down * (P - resistance-down * Q-down)
   (:process flow-down-calc
     :parameters ()
     :precondition (>= (pressure) 0)
-    :effect (increase (flow-down) (* #t (* (L-down) (- (pressure) (* (R-down) (flow-down))))))
+    :effect (increase (flow-down) (* #t (* (inertia-down) (- (pressure) (* (resistance-down) (flow-down))))))
   )
 
   ; Process to increase humidity when nozzle is on
   ; Precondition: nozzle is on
-  ; Effect: increase humidity over time
+  ; Effect: increase humidity over time by humidity increase rate
   (:process humidity-inc
     :parameters (?n - nozzle)
     :precondition (nozzle-on ?n)
@@ -186,7 +187,7 @@
 
   ; Process to decrease humidity when nozzle is off
   ; Precondition: nozzle is off, humidity is above 0
-  ; Effect: decrease humidity over time
+  ; Effect: decrease humidity over time by humidity decrease rate
   (:process humidity-dec
     :parameters (?n - nozzle)
     :precondition (and

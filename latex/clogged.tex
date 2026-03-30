@@ -48,7 +48,7 @@
  \maketitle 
 \section{Domain and Problem}
 {\bf Domain:} vf-misting\\
-{\bf Problem:} misting
+{\bf Problem:} misting-clogged
 \section{\sloppy Plan: plans/\-manual\_dec.plan}
 \subsection{Plan}
 Plan size: 5
@@ -99,15 +99,15 @@ Plan size: 5
  \> \function{(sim-time)}{t + 1}\\
  \> \function{(pump-level pump1)}{0.5t}\\
  \> \function{(pressure)}{-75e^{ - 1.25t^2} + 75}\\
+ \> \function{(flow-up)}{-0.26e^{ - 1.25t^2} + 0.26}\\
+ \> \function{(flow-down)}{-0.26e^{ - 1.25t^2} + 0.26}\\
  \> \function{(humidity)}{ - 0.2t + 29.8}\\
- \> \function{(flow-up)}{-0.260025e^{ - 1.25t^2} + 0.260025}\\
- \> \function{(flow-down)}{-0.260025e^{ - 1.25t^2} + 0.260025}\\
  \> \assignmentcts{(sim-time)}{1}{1.1}\\
  \> \assignmentcts{(pump-level pump1)}{0}{0.05}\\
  \> \assignmentcts{(pressure)}{0}{0.931665}\\
+ \> \assignmentcts{(flow-up)}{0}{0.00322977}\\
+ \> \assignmentcts{(flow-down)}{0}{0.00322977}\\
  \> \assignmentcts{(humidity)}{29.8}{29.78}\\
- \> \assignmentcts{(flow-up)}{0}{0.00323008}\\
- \> \assignmentcts{(flow-down)}{0}{0.00323008}\\
 \\
 \atime{1.1} \> \checkhappening\happeningOK\\
  \> \adding{(nozzle-on nozzle1)}\\
@@ -120,15 +120,15 @@ Plan size: 5
  \> \function{(sim-time)}{t + 1.1}\\
  \> \function{(pump-level pump1)}{0.5t + 0.05}\\
  \> \function{(pressure)}{-74.0683e^{ - 1.25t^2 - 0.25t} + 75}\\
+ \> \function{(flow-up)}{-0.25677e^{ - 1.25t^2 - 0.25t} + 0.26}\\
+ \> \function{(flow-down)}{-0.25677e^{ - 1.25t^2 - 0.25t} + 0.26}\\
  \> \function{(humidity)}{2t + 29.78}\\
- \> \function{(flow-up)}{-0.256795e^{ - 1.25t^2 - 0.25t} + 0.260025}\\
- \> \function{(flow-down)}{-0.256795e^{ - 1.25t^2 - 0.25t} + 0.260025}\\
  \> \assignmentcts{(sim-time)}{1.1}{3}\\
  \> \assignmentcts{(pump-level pump1)}{0.05}{1}\\
  \> \assignmentcts{(pressure)}{0.931665}{74.4947}\\
+ \> \assignmentcts{(flow-up)}{0.00322977}{0.258248}\\
+ \> \assignmentcts{(flow-down)}{0.00322977}{0.258248}\\
  \> \assignmentcts{(humidity)}{29.78}{33.58}\\
- \> \assignmentcts{(flow-up)}{0.00323008}{0.258273}\\
- \> \assignmentcts{(flow-down)}{0.00323008}{0.258273}\\
 \\
  \atime{3} \> \eventtriggered \\
 \> \aeventtriggered{\action{(stop-ramp-up pump1)}}\\
@@ -140,14 +140,14 @@ Plan size: 5
 \atime{7} \> \checkhappening\happeningOK\\
  \> \function{(sim-time)}{t + 3}\\
  \> \function{(pressure)}{-0.505346e^{ - 5t} + 75}\\
+ \> \function{(flow-up)}{-0.00175187e^{ - 5t} + 0.26}\\
+ \> \function{(flow-down)}{-0.00175187e^{ - 5t} + 0.26}\\
  \> \function{(humidity)}{2t + 33.58}\\
- \> \function{(flow-up)}{-0.00175203e^{ - 5t} + 0.260025}\\
- \> \function{(flow-down)}{-0.00175203e^{ - 5t} + 0.260025}\\
  \> \assignmentcts{(sim-time)}{3}{7}\\
  \> \assignmentcts{(pressure)}{74.4947}{75}\\
+ \> \assignmentcts{(flow-up)}{0.258248}{0.26}\\
+ \> \assignmentcts{(flow-down)}{0.258248}{0.26}\\
  \> \assignmentcts{(humidity)}{33.58}{41.58}\\
- \> \assignmentcts{(flow-up)}{0.258273}{0.260025}\\
- \> \assignmentcts{(flow-down)}{0.258273}{0.260025}\\
 \\
 \atime{7} \> \checkhappening\happeningOK\\
  \> \deleting{(pump-on pump1)}\\
@@ -166,15 +166,15 @@ Plan size: 5
  \> \function{(sim-time)}{t + 7}\\
  \> \function{(pump-level pump1)}{ - 0.5t + 1}\\
  \> \function{(pressure)}{75e^{ - 1.25t^2}}\\
+ \> \function{(flow-up)}{0.26e^{ - 1.25t^2}}\\
+ \> \function{(flow-down)}{0.26e^{ - 1.25t^2}}\\
  \> \function{(humidity)}{2t + 41.58}\\
- \> \function{(flow-up)}{0.260025e^{ - 1.25t^2}}\\
- \> \function{(flow-down)}{0.260025e^{ - 1.25t^2}}\\
  \> \assignmentcts{(sim-time)}{7}{7.1}\\
  \> \assignmentcts{(pump-level pump1)}{1}{0.95}\\
  \> \assignmentcts{(pressure)}{75}{74.0683}\\
+ \> \assignmentcts{(flow-up)}{0.26}{0.25677}\\
+ \> \assignmentcts{(flow-down)}{0.26}{0.25677}\\
  \> \assignmentcts{(humidity)}{41.58}{41.78}\\
- \> \assignmentcts{(flow-up)}{0.260025}{0.256795}\\
- \> \assignmentcts{(flow-down)}{0.260025}{0.256795}\\
 \\
 \atime{7.1} \> \checkhappening\happeningOK\\
  \> \deleting{(nozzle-on nozzle1)}\\
@@ -187,15 +187,15 @@ Plan size: 5
  \> \function{(sim-time)}{t + 7.1}\\
  \> \function{(pump-level pump1)}{ - 0.5t + 0.95}\\
  \> \function{(pressure)}{74.0683e^{ - 1.25t^2 - 0.25t}}\\
+ \> \function{(flow-up)}{0.25677e^{ - 1.25t^2 - 0.25t}}\\
+ \> \function{(flow-down)}{0.25677e^{ - 1.25t^2 - 0.25t}}\\
  \> \function{(humidity)}{ - 0.2t + 41.78}\\
- \> \function{(flow-up)}{0.256795e^{ - 1.25t^2 - 0.25t}}\\
- \> \function{(flow-down)}{0.256795e^{ - 1.25t^2 - 0.25t}}\\
  \> \assignmentcts{(sim-time)}{7.1}{9}\\
  \> \assignmentcts{(pump-level pump1)}{0.95}{0}\\
  \> \assignmentcts{(pressure)}{74.0683}{0.505346}\\
+ \> \assignmentcts{(flow-up)}{0.25677}{0.00175187}\\
+ \> \assignmentcts{(flow-down)}{0.25677}{0.00175187}\\
  \> \assignmentcts{(humidity)}{41.78}{41.4}\\
- \> \assignmentcts{(flow-up)}{0.256795}{0.00175203}\\
- \> \assignmentcts{(flow-down)}{0.256795}{0.00175203}\\
 \\
  \atime{9} \> \eventtriggered \\
 \> \aeventtriggered{\action{(stop-ramp-down pump1)}}\\
@@ -207,14 +207,14 @@ Plan size: 5
 \atime{10} \> \checkhappening\happeningOK\\
  \> \function{(sim-time)}{t + 9}\\
  \> \function{(pressure)}{0.505346e^{ - 5t}}\\
+ \> \function{(flow-up)}{0.00175187e^{ - 5t}}\\
+ \> \function{(flow-down)}{0.00175187e^{ - 5t}}\\
  \> \function{(humidity)}{ - 0.2t + 41.4}\\
- \> \function{(flow-up)}{0.00175203e^{ - 5t}}\\
- \> \function{(flow-down)}{0.00175203e^{ - 5t}}\\
  \> \assignmentcts{(sim-time)}{9}{10}\\
  \> \assignmentcts{(pressure)}{0.505346}{0.00340499}\\
+ \> \assignmentcts{(flow-up)}{0.00175187}{1.1804e-05}\\
+ \> \assignmentcts{(flow-down)}{0.00175187}{1.1804e-05}\\
  \> \assignmentcts{(humidity)}{41.4}{41.2}\\
- \> \assignmentcts{(flow-up)}{0.00175203}{1.18051e-05}\\
- \> \assignmentcts{(flow-down)}{0.00175203}{1.18051e-05}\\
 \\
 \atime{10} \> \checkhappening\happeningOK\\
  \> \adding{(done)}\\
@@ -773,41 +773,6 @@ Plan executed successfully - checking goal\\
 \end{picture} \caption{Graph of (pressure).}
 \end{center} \end{figure} 
 %%-----------------------------------------------------------
-%%--------- Graph of (humidity) --------------------------------------------------
-\begin{figure}[!ht] \begin{center} \setlength{\unitlength}{100pt}
-\begin{picture}(3.6,2.32)(0,0)
-\thinlines
-\put(-0.038,0){ \vector(1,0){3.6} }
-\put(3.562,0){ Time }
-\put(-0.038,0){ \vector(0,1){2.2} }
-\put(-0.038,2.1){ Value }
-\put(-0.018,-0.1){ 0 }
-\put(3.562,0){ \line(0,-1){0.05} }
-\put(3.562,-0.1){ 10 }
-\put(-0.038,0){ \line(-1,0){0.05} }
-\put(-0.238,0){ 0 }
-\put(-0.038,2){ \line(-1,0){0.05} }
-\put(-0.338,2){ 41.78 }
-\put(-0.038,0){ \line(0,-1){0.05} }
-\put(-0.038,0){ \line(0,-1){0.05} }
-\put(0.322,0){ \line(0,-1){0.05} }
-\put(0.358,0){ \line(0,-1){0.05} }
-\put(1.042,0){ \line(0,-1){0.05} }
-\put(2.482,0){ \line(0,-1){0.05} }
-\put(2.518,0){ \line(0,-1){0.05} }
-\put(3.202,0){ \line(0,-1){0.05} }
-\put(3.562,0){ \line(0,-1){0.05} }
-\thicklines
-\qbezier(0,1.43609)(0.18,1.43131)(0.36,1.42652)
-\qbezier(0.36,1.42652)(0.378,1.42604)(0.396,1.42556)
-\qbezier(0.396,1.42556)(0.738,1.51652)(1.08,1.60747)
-\qbezier(1.08,1.60747)(1.8,1.79895)(2.52,1.99043)
-\qbezier(2.52,1.99043)(2.538,1.99521)(2.556,2)
-\qbezier(2.556,2)(2.898,1.9909)(3.24,1.98181)
-\qbezier(3.24,1.98181)(3.42,1.97702)(3.6,1.97224)
-\end{picture} \caption{Graph of (humidity).}
-\end{center} \end{figure} 
-%%-----------------------------------------------------------
 %%--------- Graph of (flow-up) --------------------------------------------------
 \begin{figure}[!ht] \begin{center} \setlength{\unitlength}{100pt}
 \begin{picture}(3.6,2.32)(0,0)
@@ -822,7 +787,7 @@ Plan executed successfully - checking goal\\
 \put(-0.038,0){ \line(-1,0){0.05} }
 \put(-0.238,0){ 0 }
 \put(-0.038,2){ \line(-1,0){0.05} }
-\put(-0.338,2){ 0.260025 }
+\put(-0.338,2){ 0.26 }
 \put(-0.038,0){ \line(0,-1){0.05} }
 \put(0.322,0){ \line(0,-1){0.05} }
 \put(0.358,0){ \line(0,-1){0.05} }
@@ -1300,7 +1265,7 @@ Plan executed successfully - checking goal\\
 \put(-0.038,0){ \line(-1,0){0.05} }
 \put(-0.238,0){ 0 }
 \put(-0.038,2){ \line(-1,0){0.05} }
-\put(-0.338,2){ 0.260025 }
+\put(-0.338,2){ 0.26 }
 \put(-0.038,0){ \line(0,-1){0.05} }
 \put(0.322,0){ \line(0,-1){0.05} }
 \put(0.358,0){ \line(0,-1){0.05} }
@@ -1762,6 +1727,41 @@ Plan executed successfully - checking goal\\
 \qbezier(3.5856,0.000110903)(3.5892,0.000105626)(3.5928,0.000100349)
 \qbezier(3.5928,0.000100349)(3.5964,0)(3.6,0)
 \end{picture} \caption{Graph of (flow-down).}
+\end{center} \end{figure} 
+%%-----------------------------------------------------------
+%%--------- Graph of (humidity) --------------------------------------------------
+\begin{figure}[!ht] \begin{center} \setlength{\unitlength}{100pt}
+\begin{picture}(3.6,2.32)(0,0)
+\thinlines
+\put(-0.038,0){ \vector(1,0){3.6} }
+\put(3.562,0){ Time }
+\put(-0.038,0){ \vector(0,1){2.2} }
+\put(-0.038,2.1){ Value }
+\put(-0.018,-0.1){ 0 }
+\put(3.562,0){ \line(0,-1){0.05} }
+\put(3.562,-0.1){ 10 }
+\put(-0.038,0){ \line(-1,0){0.05} }
+\put(-0.238,0){ 0 }
+\put(-0.038,2){ \line(-1,0){0.05} }
+\put(-0.338,2){ 41.78 }
+\put(-0.038,0){ \line(0,-1){0.05} }
+\put(-0.038,0){ \line(0,-1){0.05} }
+\put(0.322,0){ \line(0,-1){0.05} }
+\put(0.358,0){ \line(0,-1){0.05} }
+\put(1.042,0){ \line(0,-1){0.05} }
+\put(2.482,0){ \line(0,-1){0.05} }
+\put(2.518,0){ \line(0,-1){0.05} }
+\put(3.202,0){ \line(0,-1){0.05} }
+\put(3.562,0){ \line(0,-1){0.05} }
+\thicklines
+\qbezier(0,1.43609)(0.18,1.43131)(0.36,1.42652)
+\qbezier(0.36,1.42652)(0.378,1.42604)(0.396,1.42556)
+\qbezier(0.396,1.42556)(0.738,1.51652)(1.08,1.60747)
+\qbezier(1.08,1.60747)(1.8,1.79895)(2.52,1.99043)
+\qbezier(2.52,1.99043)(2.538,1.99521)(2.556,2)
+\qbezier(2.556,2)(2.898,1.9909)(3.24,1.98181)
+\qbezier(3.24,1.98181)(3.42,1.97702)(3.6,1.97224)
+\end{picture} \caption{Graph of (humidity).}
 \end{center} \end{figure} 
 %%-----------------------------------------------------------
 \subsection{Gantt Chart}

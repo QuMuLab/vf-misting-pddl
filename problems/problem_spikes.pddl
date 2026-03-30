@@ -10,39 +10,37 @@
 
   (:init
     ; Predicates
+    (not (done))
+
     (not (pump-on pump1))
     (not (pump-ramping-up pump1))
     (not (pump-ramping-down pump1))
 
     (not (nozzle-on nozzle1))
 
-    (not (done))
-
     ; Variables
     (= (sim-time) 0)
     (= (pump-level pump1) 0)
 
     (= (pressure) 0)
-    (= (humidity) 30)
 
     (= (flow-up) 0)
-    (= (flow-nozzle) 0)
     (= (flow-down) 0)
+
+    (= (humidity) 30)
 
     ; Constants
     (= (done-time) 10)
+
     (= (max-pressure) 517000)
 
     (= (k-pressure) 20500000000000)
-    (= (L-up) 0.0000002)
-    (= (L-down) 0.00000002)
-    (= (R-up) 10000000000)
-    (= (R-down) 194000000000)
-
-    ; Coeffs for ENHSP-2020
-    ; (= (k-nozzle) 0.0000000023)
-    ; Coeffs for VAL
-    (= (k-nozzle) 0.0000000000032)
+    (= (inertia-up) 0.0000002)
+    (= (inertia-down) 0.00000002)
+    (= (resistance-up) 10000000000)
+    (= (resistance-down) 194000000000)
+    ; (= (k-nozzle) 0.0000000023) ; For ENHSP-2020
+    (= (k-nozzle) 0.0000000000032) ; For VAL
 
     (= (min-humidity) 40)
     (= (max-humidity) 60)

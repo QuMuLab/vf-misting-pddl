@@ -63,10 +63,10 @@ Plan size: 5
 \subsection{Plan To Validate}
 \begin{tabbing}
 \headingtimehappening 
-\atime{1}  \> \listrow{\action{(activate-pump)}}\\
-\\\atime{1.1}  \> \listrow{\action{(activate-nozzle)}}\\
-\\\atime{7}  \> \listrow{\action{(deactivate-pump)}}\\
-\\\atime{7.1}  \> \listrow{\action{(deactivate-nozzle)}}\\
+\atime{1}  \> \listrow{\action{(activate-pump pump1)}}\\
+\\\atime{1.1}  \> \listrow{\action{(activate-nozzle nozzle1 pump1)}}\\
+\\\atime{7}  \> \listrow{\action{(deactivate-pump pump1)}}\\
+\\\atime{7.1}  \> \listrow{\action{(deactivate-nozzle nozzle1)}}\\
 \\\atime{10}  \> \listrow{\action{(finish)}}\\
 \end{tabbing}
 
@@ -76,7 +76,10 @@ Plan size: 5
 \\
  \atime{0} \> \eventtriggered \\
 \> \aprocessactivated{\action{(time-inc)}}\\
-\> \aprocessactivated{\action{(pump-off)}}\\
+\> \aprocessactivated{\action{(pressure-calc)}}\\
+\> \aprocessactivated{\action{(flow-up-calc)}}\\
+\> \aprocessactivated{\action{(flow-down-calc)}}\\
+\> \aprocessactivated{\action{(humidity-dec nozzle1)}}\\
 \error \\
 \end{tabbing}
 Error occurred in validation attempt:\\
@@ -86,10 +89,10 @@ Error occurred in validation attempt:\\
 Row 1
 \begin{tabbing}
 {\bf No} \qquad \= {\bf Time} \qquad \= {\bf Action} \\
-1 \> 1 \> \listrowg{\action{(activate-pump)}} \\
-2 \> 1.1 \> \listrowg{\action{(activate-nozzle)}} \\
-3 \> 7 \> \listrowg{\action{(deactivate-pump)}} \\
-4 \> 7.1 \> \listrowg{\action{(deactivate-nozzle)}} \\
+1 \> 1 \> \listrowg{\action{(activate-pump pump1)}} \\
+2 \> 1.1 \> \listrowg{\action{(activate-nozzle nozzle1 pump1)}} \\
+3 \> 7 \> \listrowg{\action{(deactivate-pump pump1)}} \\
+4 \> 7.1 \> \listrowg{\action{(deactivate-nozzle nozzle1)}} \\
 5 \> 10 \> \listrowg{\action{(finish)}} \\
 \end{tabbing}
 %%---------------------------------------------------------
